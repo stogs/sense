@@ -1,0 +1,36 @@
+<div class="homey-form-group">
+  <label class="homey-form-label" for="username">Sense Email / Username</label>
+  <input class="homey-form-input" id="username" type="email" value="" placeholder="your-email@example.com" />
+</div>
+
+<div class="homey-form-group">
+  <label class="homey-form-label" for="password">Sense Password</label>
+  <input class="homey-form-input" id="password" type="password" value="" placeholder="Your Password" />
+</div>
+
+<button class="homey-button-primary-full" id="loginButton">Login & Connect</button>
+
+<script>
+  Homey.setTitle('Connect to Sense');
+
+  document.getElementById('loginButton').addEventListener('click', async () => {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+      Homey.alert('Please enter both email and password.');
+      return;
+    }
+
+    Homey.showLoadingOverlay();
+
+    try {
+      await Homey.emit('login', { username, password });
+      Homey.hideLoadingOverlay();
+      Homey.nextView();
+    } catch (err) {
+      Homey.hideLoadingOverlay();
+      Homey.alert(err.message || 'Failed to login');
+    }
+  });
+</script>

@@ -1,0 +1,43 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.sense.energy",
+  "version": "1.0.0",
+  "compatibility": ">=12.0.0",
+  "name": {
+    "en": "Sense Energy"
+  },
+  "description": {
+    "en": "Monitor your home energy usage, solar production, and real-time power with Sense."
+  },
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png"
+  },
+  "author": {
+    "name": "Sense Energy"
+  },
+  "drivers": [
+    {
+      "id": "sense_monitor",
+      "name": {
+        "en": "Sense Monitor"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_power.solar",
+        "measure_power.grid",
+        "measure_power.net"
+      ],
+      "images": {
+        "small": "/assets/images/small.png",
+        "large": "/assets/images/large.png"
+      }
+    }
+  ]
+}
