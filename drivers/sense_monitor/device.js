@@ -15,7 +15,14 @@ class SenseMonitorDevice extends Homey.Device {
       return;
     }
 
-    this.client = new SenseApiClient();
+    this.client = new SenseApiClient(undefined, {
+      logger: {
+        debug: (msg, ...args) => this.log('[DEBUG]', msg, ...args),
+        info: (msg, ...args) => this.log('[INFO]', msg, ...args),
+        warn: (msg, ...args) => this.log('[WARN]', msg, ...args),
+        error: (msg, ...args) => this.error('[ERROR]', msg, ...args),
+      }
+    });
 
     try {
       this.log('Authenticating with Sense API...');
@@ -105,6 +112,7 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   handleRealtimeData(payload) {
+    this.log('Realtime WebSocket payload received:', JSON.stringify(payload));
     // Payload typically contains w (active power) etc.
     if (payload.w !== undefined) {
       const power = payload.w;
