@@ -1,0 +1,31 @@
+{
+  "name": {
+    "en": "Sense Monitor"
+  },
+  "class": "sensor",
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "capabilities": [
+    "measure_power",
+    "meter_power",
+    "measure_power.solar",
+    "measure_power.grid",
+    "measure_power.net"
+  ],
+  "images": {
+    "small": "/drivers/sense_monitor/assets/images/small.png",
+    "large": "/drivers/sense_monitor/assets/images/large.png"
+  },
+  "pair": [
+    {
+      "id": "login"
+    },
+    {
+      "id": "list_devices"
+    }
+  ]
+}

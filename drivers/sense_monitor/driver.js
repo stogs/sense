@@ -7,6 +7,13 @@ class SenseMonitorDriver extends Homey.Driver {
     this.log('SenseMonitorDriver initialized');
   }
 
+  async createDevice(options) {
+    const devices = this.getDevices();
+    this.log('Current devices in driver:', devices.length);
+    // Homey drivers in SDK v3 manage device storage/creation during pairing or app state
+    return null;
+  }
+
   async onPair(session) {
     let credentials = {};
 
