@@ -10,7 +10,10 @@ class SenseMonitorDevice extends Homey.Device {
     const username = settings.username;
     const password = settings.password;
 
+    this.log('Device settings retrieved. Username present:', !!username, 'Password present:', !!password);
+
     if (!username || !password) {
+      this.log('Missing username or password in device settings!');
       this.setUnavailable('Please configure your Sense credentials in device settings.');
       return;
     }
