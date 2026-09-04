@@ -19,7 +19,11 @@
   "author": {
     "name": "Sense Energy"
   },
+  "support": "https://github.com/stogs/sense/issues",
   "brandColor": "#0052cc",
+  "platforms": [
+    "local"
+  ],
   "drivers": [
     {
       "id": "sense_monitor",
@@ -27,6 +31,12 @@
         "en": "Sense Monitor"
       },
       "class": "sensor",
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "cloud"
+      ],
       "capabilities": [
         "measure_power",
         "meter_power",
