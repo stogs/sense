@@ -52,19 +52,18 @@ class SenseMonitorDevice extends Homey.Device {
         await this.updateData();
       }, 30000);
 
-      // Start real-time updates if supported
-      try {
-        await this.client.startRealtimeUpdates(this.monitorId);
+        this.client.startRealtimeUpdates(this.monitorId).then(() => {
+          this.log('Real-time WebSocket connection established successfully.');
+        }).catch(wsErr => {
+          this.log('Could not start real-time updates, relying on polling:', wsErr.message);
+        });
+
         this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
           this.log('Raw realtimeUpdate event received:', JSON.stringify(data));
           if (data.type === 'data_change' && data.payload) {
             this.handleRealtimeData(data.payload);
           }
         });
-        this.log('Real-time WebSocket updates started.');
-      } catch (wsErr) {
-        this.log('Could not start real-time updates, relying on polling:', wsErr.message);
-      }
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
