@@ -56,6 +56,7 @@ class SenseMonitorDevice extends Homey.Device {
       try {
         await this.client.startRealtimeUpdates(this.monitorId);
         this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
+          this.log('Raw realtimeUpdate event received:', JSON.stringify(data));
           if (data.type === 'data_change' && data.payload) {
             this.handleRealtimeData(data.payload);
           }
