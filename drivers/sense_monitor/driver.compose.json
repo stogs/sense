@@ -1,26 +1,23 @@
-[
-  {
-    "type": "group",
-    "label": {
-      "en": "Sense Credentials"
-    },
-    "children": [
-      {
-        "id": "username",
-        "type": "text",
-        "label": {
-          "en": "Email / Username"
-        },
-        "value": ""
-      },
-      {
-        "id": "password",
-        "type": "password",
-        "label": {
-          "en": "Password"
-        },
-        "value": ""
-      }
-    ]
+{
+  "name": {
+    "en": "Sense Monitor"
+  },
+  "class": "sensor",
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "capabilities": [
+    "measure_power",
+    "meter_power",
+    "measure_power.solar",
+    "measure_power.grid",
+    "measure_power.net"
+  ],
+  "images": {
+    "small": "/drivers/sense_monitor/assets/images/small.png",
+    "large": "/drivers/sense_monitor/assets/images/large.png"
   }
-]
+}

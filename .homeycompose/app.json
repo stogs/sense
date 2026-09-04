@@ -1,0 +1,27 @@
+{
+  "id": "com.sense.energy",
+  "version": "1.0.0",
+  "compatibility": ">=12.0.0",
+  "name": {
+    "en": "Sense Energy"
+  },
+  "description": {
+    "en": "Monitor your home energy usage, solar production, and real-time power with Sense."
+  },
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png"
+  },
+  "author": {
+    "name": "Sense Energy"
+  },
+  "support": "https://github.com/stogs/sense/issues",
+  "brandColor": "#0052cc",
+  "platforms": [
+    "local"
+  ]
+}
