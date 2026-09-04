@@ -19,6 +19,7 @@
   "author": {
     "name": "Sense Energy"
   },
+  "brandColor": "#0052cc",
   "drivers": [
     {
       "id": "sense_monitor",
