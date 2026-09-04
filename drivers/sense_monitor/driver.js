@@ -15,7 +15,14 @@ class SenseMonitorDriver extends Homey.Driver {
       credentials.password = data.password;
 
       try {
-        const client = new SenseApiClient();
+        const client = new SenseApiClient(undefined, {
+          logger: {
+            debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
+            info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[PAIR INFO]', msg, ...args); },
+            warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
+            error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
+          }
+        });
         const mfaToken = await client.login(credentials.username, credentials.password);
 
         if (mfaToken) {
@@ -36,7 +43,14 @@ class SenseMonitorDriver extends Homey.Driver {
 
     session.setHandler('list_devices', async () => {
       try {
-        const client = new SenseApiClient();
+        const client = new SenseApiClient(undefined, {
+          logger: {
+            debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
+            info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[INFO]', msg, ...args); },
+            warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
+            error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
+          }
+        });
         await client.login(credentials.username, credentials.password);
         const monitorIds = client.session?.monitorIds || [];
 
