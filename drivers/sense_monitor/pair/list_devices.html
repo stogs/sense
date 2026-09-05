@@ -1,0 +1,17 @@
+<div class="homey-form-group">
+  <p class="homey-p">Connecting to Sense and discovering monitors...</p>
+</div>
+
+<script>
+  Homey.setTitle('Discovering Sense Monitors');
+  Homey.showLoadingOverlay();
+
+  Homey.emit('list_devices', {}, function(err, devices) {
+    Homey.hideLoadingOverlay();
+    if (err) {
+      Homey.alert(err.message || 'Failed to discover devices');
+      return;
+    }
+    // Devices are automatically handled by list_devices session handler
+  });
+</script>

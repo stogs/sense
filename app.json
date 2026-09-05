@@ -62,6 +62,14 @@
         "measure_power.grid",
         "measure_power.net"
       ],
+      "pair": [
+        {
+          "id": "login"
+        },
+        {
+          "id": "list_devices"
+        }
+      ],
       "images": {
         "small": "/drivers/sense_monitor/assets/images/small.png",
         "large": "/drivers/sense_monitor/assets/images/large.png"
