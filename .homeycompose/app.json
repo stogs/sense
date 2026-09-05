@@ -23,5 +23,23 @@
   "brandColor": "#0052cc",
   "platforms": [
     "local"
+  ],
+  "settings": [
+    {
+      "id": "username",
+      "type": "text",
+      "title": {
+        "en": "Email / Username"
+      },
+      "value": ""
+    },
+    {
+      "id": "password",
+      "type": "password",
+      "title": {
+        "en": "Password"
+      },
+      "value": ""
+    }
   ]
 }
