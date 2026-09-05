@@ -16,7 +16,10 @@
       Homey.alert('No Sense monitors found on this account.');
       return;
     }
-    Homey.createDevice(devices, function(err) {
+    // In SDK v3, returning devices from session handler automatically populates list view,
+    // or we can pass them directly to Homey.addDevice() if using a custom list view.
+    // Let's use Homey.addDevice(devices) or let Homey handle it.
+    Homey.addDevice(devices, function(err) {
       if (err) {
         Homey.alert(err.message || 'Failed to add device');
         return;
