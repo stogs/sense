@@ -6,6 +6,36 @@
   "platforms": [
     "local"
   ],
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "Sense Credentials"
+      },
+      "children": [
+        {
+          "id": "username",
+          "type": "text",
+          "label": {
+            "en": "Email / Username"
+          },
+          "hint": {
+            "en": "Your Sense account email address"
+          }
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password"
+          },
+          "hint": {
+            "en": "Your Sense account password"
+          }
+        }
+      ]
+    }
+  ],
   "connectivity": [
     "cloud"
   ],
