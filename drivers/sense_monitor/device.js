@@ -143,18 +143,17 @@ class SenseMonitorDevice extends Homey.Device {
     }
   }
 
-  async onDeleted() {
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
+  async onAdded() {
+    this.log('SenseMonitorDevice has been added');
+  }
+
+  async onSettings({ oldSettings, newSettings, changedKeys }) {
+    this.log('SenseMonitorDevice settings changed:', changedKeys);
+    if (changedKeys.includes('username') || changedKeys.includes('password')) {
+      this.log('Credentials updated in settings. Re-initializing device connection...');
+      // Restart initialization or re-trigger connection
+      await this.onInit();
     }
-    try {
-      if (this.client) {
-        await this.client.stopRealtimeUpdates();
-      }
-    } catch (e) {
-      // ignore
-    }
-    this.log('SenseMonitorDevice deleted');
   }
 
 }
