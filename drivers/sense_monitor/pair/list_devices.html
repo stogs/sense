@@ -6,12 +6,18 @@
   Homey.setTitle('Discovering Sense Monitors');
   Homey.showLoadingOverlay();
 
-  Homey.emit('list_devices', {}, function(err, devices) {
+  Homey.emit('list_devices', null, function(err, devices) {
     Homey.hideLoadingOverlay();
     if (err) {
       Homey.alert(err.message || 'Failed to discover devices');
       return;
     }
-    // Devices are automatically handled by list_devices session handler
+    Homey.createDevice(devices, function(err) {
+      if (err) {
+        Homey.alert(err.message || 'Failed to add device');
+        return;
+      }
+      Homey.done();
+    });
   });
 </script>
