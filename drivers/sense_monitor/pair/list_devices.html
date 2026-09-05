@@ -1,5 +1,5 @@
 <div class="homey-form-group">
-  <p class="homey-p">Connecting to Sense and discovering monitors...</p>
+  <p class="homey-p" id="statusMessage">Connecting to Sense and discovering monitors...</p>
 </div>
 
 <script>
@@ -10,6 +10,10 @@
     Homey.hideLoadingOverlay();
     if (err) {
       Homey.alert(err.message || 'Failed to discover devices');
+      return;
+    }
+    if (!devices || devices.length === 0) {
+      Homey.alert('No Sense monitors found on this account.');
       return;
     }
     Homey.createDevice(devices, function(err) {
