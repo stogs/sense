@@ -70,7 +70,7 @@ class SenseMonitorDriver extends Homey.Driver {
 
         this.log('[PAIR] Found monitor IDs:', monitorIds);
 
-        return monitorIds.map((id, index) => {
+        const devices = monitorIds.map((id, index) => {
           return {
             name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
             data: {
@@ -82,6 +82,9 @@ class SenseMonitorDriver extends Homey.Driver {
             },
           };
         });
+
+        this.log('[PAIR] Returning devices to frontend:', devices);
+        return devices;
       } catch (err) {
         this.error('Failed to list devices during pairing:', err);
         throw err;
