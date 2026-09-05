@@ -25,9 +25,13 @@
     Homey.showLoadingOverlay();
 
     try {
-      await Homey.emit('login', { username, password });
+      const result = await Homey.emit('login', { username, password });
       Homey.hideLoadingOverlay();
-      Homey.nextView();
+      if (result && result.mfaRequired) {
+        Homey.showView('mfa');
+      } else {
+        Homey.nextView();
+      }
     } catch (err) {
       Homey.hideLoadingOverlay();
       Homey.alert(err.message || 'Failed to login');

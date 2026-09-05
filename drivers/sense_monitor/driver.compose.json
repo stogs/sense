@@ -51,6 +51,9 @@
       "id": "login"
     },
     {
+      "id": "mfa"
+    },
+    {
       "id": "list_devices"
     }
   ],
