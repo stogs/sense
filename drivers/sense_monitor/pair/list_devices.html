@@ -1,3 +1,27 @@
+<div class="homey-form-group">
+  <p class="homey-p">Discovering Sense monitors...</p>
+</div>
+
 <script>
   Homey.setTitle('Discovering Sense Monitors');
+  Homey.showLoadingOverlay();
+
+  Homey.emit('list_devices', null, function(err, devices) {
+    Homey.hideLoadingOverlay();
+    if (err) {
+      Homey.alert(err.message || 'Failed to discover devices');
+      return;
+    }
+    if (!devices || devices.length === 0) {
+      Homey.alert('No Sense monitors found on this account.');
+      return;
+    }
+    Homey.addDevice(devices, function(err) {
+      if (err) {
+        Homey.alert(err.message || 'Failed to add device');
+        return;
+      }
+      Homey.done();
+    });
+  });
 </script>
