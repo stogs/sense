@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+</head>
+<body>
+    <header class="homey-header">
+        <h1 class="homey-title">Sense Credentials</h1>
+        <p class="homey-subtitle">Enter your Sense account credentials</p>
+    </header>
+
+    <fieldset class="homey-form-fieldset">
+        <div class="homey-form-group">
+            <label class="homey-form-label" for="username">Email / Username</label>
+            <input class="homey-form-input" id="username" type="text" placeholder="your-email@example.com" />
+        </div>
+
+        <div class="homey-form-group">
+            <label class="homey-form-label" for="password">Password</label>
+            <input class="homey-form-input" id="password" type="password" placeholder="Your Password" />
+        </div>
+    </fieldset>
+
+    <script type="text/javascript">
+        function onHomeyReady(Homey) {
+            Homey.get('username', function(err, username) {
+                if (!err && username) {
+                    document.getElementById('username').value = username;
+                }
+            });
+
+            Homey.get('password', function(err, password) {
+                if (!err && password) {
+                    document.getElementById('password').value = password;
+                }
+            });
+
+            document.getElementById('username').addEventListener('input', function() {
+                Homey.set('username', this.value, function(err) {});
+            });
+
+            document.getElementById('password').addEventListener('input', function() {
+                Homey.set('password', this.value, function(err) {});
+            });
+
+            Homey.ready();
+        }
+    </script>
+</body>
+</html>
