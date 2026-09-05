@@ -16,7 +16,9 @@
       Homey.alert('No Sense monitors found on this account.');
       return;
     }
-    Homey.addDevice(devices, function(err) {
+    // Homey SDK v3 requires each device object in the array to have { name, data: { id }, settings }
+    // Let's pass the array directly to Homey.createDevice or Homey.addDevice
+    Homey.createDevice(devices, function(err) {
       if (err) {
         Homey.alert(err.message || 'Failed to add device');
         return;
