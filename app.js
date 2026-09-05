@@ -24,7 +24,11 @@ class SenseApp extends Homey.App {
         return;
       }
 
-      this.log('No Sense devices found. Creating default auto-provisioned device via driver...');
+      const appSettings = this.homey.settings.get();
+      const username = appSettings.username || '';
+      const password = appSettings.password || '';
+
+      this.log('No Sense devices found. Creating default auto-provisioned device with app-level settings...');
       
       await driver.createDevice({
         name: 'Sense Monitor',
@@ -32,8 +36,8 @@ class SenseApp extends Homey.App {
           id: 'default_sense_monitor',
         },
         settings: {
-          username: '',
-          password: '',
+          username: username,
+          password: password,
         },
       });
       this.log('Successfully auto-created Sense Monitor device!');
