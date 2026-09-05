@@ -16,15 +16,14 @@ class SenseMonitorDriver extends Homey.Driver {
 
   async onPair(session) {
     let credentials = {};
-    let pendingMfaToken = null;
-    let tempClient = null;
+    let authenticatedClient = null;
 
     session.setHandler('login', async (data) => {
       credentials.username = data.username;
       credentials.password = data.password;
 
       try {
-        tempClient = new SenseApiClient(undefined, {
+        const client = new SenseApiClient(undefined, {
           logger: {
             debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
             info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[PAIR INFO]', msg, ...args); },
@@ -32,70 +31,44 @@ class SenseMonitorDriver extends Homey.Driver {
             error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
           }
         });
-        const mfaToken = await tempClient.login(credentials.username, credentials.password);
+        const mfaToken = await client.login(credentials.username, credentials.password);
 
         if (mfaToken) {
-          pendingMfaToken = mfaToken;
-          return { mfaRequired: true };
+          throw new Error('MFA is enabled on your Sense account, but MFA is not configured in this pairing flow. Please disable MFA in your Sense account.');
         }
 
-        const monitorIds = tempClient.session?.monitorIds;
+        const monitorIds = client.session?.monitorIds;
         if (!monitorIds || monitorIds.length === 0) {
           throw new Error('No Sense monitors found on this account.');
         }
 
-        return { mfaRequired: false };
+        authenticatedClient = client;
+        return true;
       } catch (err) {
         this.error('Pairing login failed:', err);
         throw err;
       }
     });
 
-    session.setHandler('mfa', async (data) => {
-      try {
-        if (!pendingMfaToken) {
-          throw new Error('No pending MFA session found.');
-        }
-        await tempClient.completeMfaLogin(pendingMfaToken, data.otp, new Date());
-        const monitorIds = tempClient.session?.monitorIds;
-        if (!monitorIds || monitorIds.length === 0) {
-          throw new Error('No Sense monitors found on this account.');
-        }
-        return true;
-      } catch (err) {
-        this.error('MFA verification failed:', err);
-        throw err;
-      }
-    });
-
     session.setHandler('list_devices', async () => {
       try {
-        if (tempClient && tempClient.isAuthenticated) {
-          const monitorIds = tempClient.session?.monitorIds || [];
-          return monitorIds.map((id, index) => {
-            return {
-              name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
-              data: {
-                id: id,
-              },
-              settings: {
-                username: credentials.username,
-                password: credentials.password,
-              },
-            };
+        let monitorIds = authenticatedClient?.session?.monitorIds;
+
+        if (!monitorIds || monitorIds.length === 0) {
+          this.log('[PAIR] Re-authenticating client for device listing...');
+          const client = new SenseApiClient(undefined, {
+            logger: {
+              debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
+              info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[INFO]', msg, ...args); },
+              warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
+              error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
+            }
           });
+          await client.login(credentials.username, credentials.password);
+          monitorIds = client.session?.monitorIds || [];
         }
 
-        const client = new SenseApiClient(undefined, {
-          logger: {
-            debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
-            info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[INFO]', msg, ...args); },
-            warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
-            error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
-          }
-        });
-        await client.login(credentials.username, credentials.password);
-        const monitorIds = client.session?.monitorIds || [];
+        this.log('[PAIR] Found monitor IDs:', monitorIds);
 
         return monitorIds.map((id, index) => {
           return {
