@@ -52,7 +52,9 @@ class SenseMonitorDriver extends Homey.Driver {
 
     session.setHandler('list_devices', async () => {
       try {
+        this.log('[PAIR] list_devices handler triggered');
         let monitorIds = authenticatedClient?.session?.monitorIds;
+        this.log('[PAIR] Initial authenticatedClient monitorIds:', monitorIds);
 
         if (!monitorIds || monitorIds.length === 0) {
           this.log('[PAIR] Re-authenticating client for device listing...');
@@ -62,9 +64,24 @@ class SenseMonitorDriver extends Homey.Driver {
               info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[INFO]', msg, ...args); },
               warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
               error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
+            },
+            fetcher: async (url, options) => {
+              this.log('[API REQ]', options?.method || 'GET', url, options?.body ? String(options.body) : '');
+              const res = await fetch(url, options);
+              const clone = res.clone();
+              try {
+                const json = await clone.json();
+                this.log('[API RES JSON]', url, JSON.stringify(json, null, 2));
+              } catch (e) {
+                const text = await clone.text();
+                this.log('[API RES TEXT]', url, text);
+              }
+              return res;
             }
           });
-          await client.login(credentials.username, credentials.password);
+          const authResult = await client.login(credentials.username, credentials.password);
+          this.log('[PAIR] Re-login result:', authResult);
+          this.log('[PAIR] Re-login session object:', JSON.stringify(client.session, null, 2));
           monitorIds = client.session?.monitorIds || [];
         }
 
@@ -83,7 +100,7 @@ class SenseMonitorDriver extends Homey.Driver {
           };
         });
 
-        this.log('[PAIR] Returning devices to frontend:', devices);
+        this.log('[PAIR] Returning devices to frontend:', JSON.stringify(devices, null, 2));
         return devices;
       } catch (err) {
         this.error('Failed to list devices during pairing:', err);
