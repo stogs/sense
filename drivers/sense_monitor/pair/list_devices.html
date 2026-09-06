@@ -17,12 +17,12 @@
       return;
     }
     
-    // Ensure devices is an array of valid device objects with data.id
     const formattedDevices = devices.map(d => ({
       name: d.name || 'Sense Monitor',
       data: {
         id: String(d.data?.id || d.id)
       },
+      store: d.store || { id: String(d.data?.id || d.id) },
       settings: d.settings || {}
     }));
 
