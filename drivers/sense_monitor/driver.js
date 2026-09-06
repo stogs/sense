@@ -16,47 +16,20 @@ class SenseMonitorDriver extends Homey.Driver {
 
   async onPair(session) {
     let credentials = {};
-    let authenticatedClient = null;
 
     session.setHandler('login', async (data) => {
       credentials.username = data.username;
       credentials.password = data.password;
-
-      try {
-        const client = new SenseApiClient(undefined, {
-          logger: {
-            debug: (msg, ...args) => { console.log('[PAIR DEBUG]', msg, ...args); this.log('[PAIR DEBUG]', msg, ...args); },
-            info: (msg, ...args) => { console.log('[PAIR INFO]', msg, ...args); this.log('[PAIR INFO]', msg, ...args); },
-            warn: (msg, ...args) => { console.warn('[PAIR WARN]', msg, ...args); this.error('[PAIR WARN]', msg, ...args); },
-            error: (msg, ...args) => { console.error('[PAIR ERROR]', msg, ...args); this.error('[PAIR ERROR]', msg, ...args); },
-          }
-        });
-        const mfaToken = await client.login(credentials.username, credentials.password);
-
-        if (mfaToken) {
-          throw new Error('MFA is enabled on your Sense account, but MFA is not configured in this pairing flow. Please disable MFA in your Sense account.');
-        }
-
-        const monitorIds = client.session?.monitorIds;
-        if (!monitorIds || monitorIds.length === 0) {
-          throw new Error('No Sense monitors found on this account.');
-        }
-
-        authenticatedClient = client;
-        return true;
-      } catch (err) {
-        this.error('Pairing login failed:', err);
-        throw err;
-      }
+      this.log('[PAIR] login handler received credentials for:', credentials.username);
+      return true;
     });
 
     session.setHandler('list_devices', async () => {
       try {
         this.log('[PAIR] list_devices handler triggered');
         
-        // If authenticatedClient lost session or credentials weren't stored across session handlers,
-        // re-authenticate directly using stored credentials.
         if (!credentials.username || !credentials.password) {
+          this.error('[PAIR ERROR] Credentials missing in list_devices! Credentials object:', credentials);
           throw new Error('No credentials provided in pairing session. Please restart pairing.');
         }
 
@@ -83,7 +56,11 @@ class SenseMonitorDriver extends Homey.Driver {
           }
         });
 
-        await client.login(credentials.username, credentials.password);
+        const mfaToken = await client.login(credentials.username, credentials.password);
+        if (mfaToken) {
+          throw new Error('MFA is enabled on your Sense account. Please disable MFA in your Sense account.');
+        }
+
         const monitorIds = client.session?.monitorIds || [];
         this.log('[PAIR] Found monitor IDs:', monitorIds);
 
