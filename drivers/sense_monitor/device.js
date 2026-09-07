@@ -6,18 +6,35 @@ class SenseMonitorDevice extends Homey.Device {
   async onInit() {
     this.log('SenseMonitorDevice has been initialized');
 
-    let settings = this.getSettings();
-    let username = settings.username;
-    let password = settings.password;
+    let username = '';
+    let password = '';
+    try {
+      const settings = this.getSettings();
+      username = settings.username || '';
+      password = settings.password || '';
+    } catch (e) {
+      this.log('Error getting device settings:', e.message);
+    }
 
     // Fallback to app-level settings if device settings are empty
     if (!username || !password) {
-      const appSettings = this.homey.settings.get();
-      username = appSettings.username;
-      password = appSettings.password;
+      try {
+        const appSettings = this.homey.settings.get();
+        if (appSettings) {
+          username = username || appSettings.username || '';
+          password = password || appSettings.password || '';
+        }
+      } catch (e) {
+        this.log('Error getting app settings:', e.message);
+      }
+
       if (username && password) {
         this.log('Inherited credentials from app-level settings.');
-        await this.setSettings({ username, password });
+        try {
+          await this.setSettings({ username, password });
+        } catch (e) {
+          this.log('Error setting device settings:', e.message);
+        }
       }
     }
 

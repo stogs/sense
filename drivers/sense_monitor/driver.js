@@ -20,14 +20,31 @@ class SenseMonitorDriver extends Homey.Driver {
     session.setHandler('list_devices', async () => {
       this.log('[PAIR] list_devices handler called');
       
-      const appSettings = this.homey.settings.get();
-      let username = appSettings.username;
-      let password = appSettings.password;
-
-      this.log('[PAIR] App settings credentials present - username:', !!username, 'password:', !!password);
+      let username = '';
+      let password = '';
+      try {
+        username = this.homey.settings.get('username') || '';
+        password = this.homey.settings.get('password') || '';
+      } catch (e) {
+        this.log('[PAIR] Error reading settings via get(key):', e.message);
+      }
 
       if (!username || !password) {
-        throw new Error('Please enter your Sense credentials in the Homey App settings first.');
+        try {
+          const appSettings = this.homey.settings.get();
+          if (appSettings) {
+            username = username || appSettings.username || '';
+            password = password || appSettings.password || '';
+          }
+        } catch (e) {
+          this.log('[PAIR] Error reading settings via get():', e.message);
+        }
+      }
+
+      this.log('[PAIR] Credentials present - username:', !!username, 'password:', !!password);
+
+      if (!username || !password) {
+        throw new Error('Please configure your Sense credentials in the Homey App settings first.');
       }
 
       const client = new SenseApiClient(undefined, {
