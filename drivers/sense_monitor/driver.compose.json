@@ -48,7 +48,8 @@
   ],
   "pair": [
     {
-      "id": "list_devices"
+      "id": "list_devices",
+      "template": "list_devices"
     }
   ],
   "images": {
