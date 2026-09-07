@@ -35,11 +35,11 @@
                 }
             });
 
-            document.getElementById('username').addEventListener('input', function() {
+            document.getElementById('username').addEventListener('change', function() {
                 Homey.set('username', this.value, function(err) {});
             });
 
-            document.getElementById('password').addEventListener('input', function() {
+            document.getElementById('password').addEventListener('change', function() {
                 Homey.set('password', this.value, function(err) {});
             });
 
