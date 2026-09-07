@@ -90,11 +90,11 @@ class SenseMonitorDevice extends Homey.Device {
       // Fetch initial data immediately
       await this.updateData();
 
-      // Poll data every 60 seconds (no real-time WebSocket needed)
+      // Poll data every 5 minutes (300,000 ms)
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
-      }, 60000);
+      }, 5 * 60 * 1000);
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
