@@ -10,8 +10,8 @@ class SenseMonitorDevice extends Homey.Device {
     let password = '';
     try {
       const settings = this.getSettings();
-      username = settings.username || '';
-      password = settings.password || '';
+      username = settings && settings.username ? settings.username : '';
+      password = settings && settings.password ? settings.password : '';
     } catch (e) {
       this.log('Error getting device settings:', e.message);
     }
@@ -82,31 +82,33 @@ class SenseMonitorDevice extends Homey.Device {
         return;
       }
 
-      this.monitorId = monitorIds[0];
+      this.monitorId = this.getData().id || monitorIds[0];
       this.log(`Connected to Sense monitor ID: ${this.monitorId}`);
 
       this.setAvailable();
 
-      // Fetch initial data
+      // Fetch initial data immediately
       await this.updateData();
 
       // Poll data every 30 seconds
+      if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
       }, 30000);
 
-        this.client.startRealtimeUpdates(this.monitorId).then(() => {
-          this.log('Real-time WebSocket connection established successfully.');
-        }).catch(wsErr => {
-          this.log('Could not start real-time updates, relying on polling:', wsErr.message);
-        });
+      try {
+        await this.client.startRealtimeUpdates(this.monitorId);
+        this.log('Real-time WebSocket connection established successfully.');
+      } catch (wsErr) {
+        this.log('Could not start real-time updates, relying on polling:', wsErr.message);
+      }
 
-        this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
-          this.log('Raw realtimeUpdate event received:', JSON.stringify(data));
-          if (data.type === 'data_change' && data.payload) {
-            this.handleRealtimeData(data.payload);
-          }
-        });
+      this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
+        this.log('Raw realtimeUpdate event received:', JSON.stringify(data));
+        if (data.type === 'data_change' && data.payload) {
+          this.handleRealtimeData(data.payload);
+        }
+      });
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
