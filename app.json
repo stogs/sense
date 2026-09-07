@@ -95,6 +95,9 @@
       "pair": [
         {
           "id": "login"
+        },
+        {
+          "id": "list_devices"
         }
       ],
       "images": {

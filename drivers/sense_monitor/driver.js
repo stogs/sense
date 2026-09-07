@@ -16,6 +16,7 @@ class SenseMonitorDriver extends Homey.Driver {
 
   async onPair(session) {
     this.log('[PAIR] onPair session started');
+    let credentials = {};
 
     session.setHandler('login', async (data) => {
       this.log('[PAIR] login handler called with username:', data.username ? data.username.replace(/(?<=.{2}).(?=[^@]*?.@)/g, '*') : 'empty');
@@ -31,6 +32,21 @@ class SenseMonitorDriver extends Homey.Driver {
         throw new Error('No Sense monitors found on this account.');
       }
 
+      credentials.username = data.username;
+      credentials.password = data.password;
+      return true;
+    });
+
+    session.setHandler('list_devices', async () => {
+      this.log('[PAIR] list_devices handler called');
+      if (!credentials.username) {
+        throw new Error('Credentials missing. Please log in again.');
+      }
+
+      const client = new SenseApiClient();
+      await client.login(credentials.username, credentials.password);
+      const monitorIds = client.session?.monitorIds || [1000004169];
+
       const devices = monitorIds.map((id, index) => {
         return {
           name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
@@ -38,13 +54,13 @@ class SenseMonitorDriver extends Homey.Driver {
             id: String(id)
           },
           settings: {
-            username: data.username,
-            password: data.password
+            username: credentials.username,
+            password: credentials.password
           }
         };
       });
 
-      this.log('[PAIR] Returning devices array directly from login:', JSON.stringify(devices, null, 2));
+      this.log('[PAIR] Returning devices array from list_devices:', JSON.stringify(devices, null, 2));
       return devices;
     });
   }
