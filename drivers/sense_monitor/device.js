@@ -107,25 +107,28 @@ class SenseMonitorDevice extends Homey.Device {
       if (!this.monitorId) return;
 
       const overview = await this.client.getMonitorOverview(this.monitorId);
-      if (overview && overview.consumption) {
-        const power = overview.consumption.power || 0;
-        const solarPower = overview.solar ? (overview.solar.power || 0) : 0;
-        const gridPower = overview.grid ? (overview.grid.power || 0) : power;
+      this.log('Sense monitor overview response:', JSON.stringify(overview, null, 2));
+
+      if (overview) {
+        // Sense overview typically has consumption, solar, etc. or top-level fields
+        const power = overview.consumption !== undefined ? (overview.consumption.power !== undefined ? overview.consumption.power : overview.consumption) : (overview.w || 0);
+        const solarPower = overview.solar ? (overview.solar.power !== undefined ? overview.solar.power : overview.solar) : 0;
+        const gridPower = overview.grid ? (overview.grid.power !== undefined ? overview.grid.power : overview.grid) : power;
         const netPower = gridPower - solarPower;
 
-        this.log(`Power update: Consumption=${power}W, Solar=${solarPower}W, Grid=${gridPower}W`);
+        this.log(`Power update: Consumption=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
 
         if (this.hasCapability('measure_power')) {
-          await this.setCapabilityValue('measure_power', power);
+          await this.setCapabilityValue('measure_power', Number(power));
         }
         if (this.hasCapability('measure_power.solar')) {
-          await this.setCapabilityValue('measure_power.solar', solarPower);
+          await this.setCapabilityValue('measure_power.solar', Number(solarPower));
         }
         if (this.hasCapability('measure_power.grid')) {
-          await this.setCapabilityValue('measure_power.grid', gridPower);
+          await this.setCapabilityValue('measure_power.grid', Number(gridPower));
         }
         if (this.hasCapability('measure_power.net')) {
-          await this.setCapabilityValue('measure_power.net', netPower);
+          await this.setCapabilityValue('measure_power.net', Number(netPower));
         }
       }
     } catch (err) {
