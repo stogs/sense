@@ -8,10 +8,8 @@ class SenseMonitorDriver extends Homey.Driver {
   }
 
   async createDevice(options) {
-    const devices = this.getDevices();
-    this.log('Current devices in driver:', devices.length);
-    // Homey drivers in SDK v3 manage device storage/creation during pairing or app state
-    return null;
+    this.log('[PAIR] createDevice called with options:', JSON.stringify(options, null, 2));
+    return super.createDevice(options);
   }
 
   async onPair(session) {
