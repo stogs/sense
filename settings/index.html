@@ -37,13 +37,13 @@
 
             document.getElementById('username').addEventListener('change', function() {
                 if (this.value) {
-                    Homey.set('username', this.value, function(err) {});
+                    Homey.set('username', String(this.value), function(err) {});
                 }
             });
 
             document.getElementById('password').addEventListener('change', function() {
                 if (this.value) {
-                    Homey.set('password', this.value, function(err) {});
+                    Homey.set('password', String(this.value), function(err) {});
                 }
             });
 
