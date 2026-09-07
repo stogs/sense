@@ -31,37 +31,20 @@ class SenseMonitorDriver extends Homey.Driver {
         throw new Error('No Sense monitors found on this account.');
       }
 
-      // Store authenticated session or credentials for list_devices
-      session.storeData = {
-        username: data.username,
-        password: data.password,
-        monitorIds: monitorIds
-      };
-
-      return true;
-    });
-
-    session.setHandler('list_devices', async () => {
-      this.log('[PAIR] list_devices handler triggered');
-      const store = session.storeData;
-      if (!store || !store.monitorIds) {
-        throw new Error('Session expired or not logged in. Please restart pairing.');
-      }
-
-      const devices = store.monitorIds.map((id, index) => {
+      const devices = monitorIds.map((id, index) => {
         return {
           name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
           data: {
             id: String(id)
           },
           settings: {
-            username: store.username,
-            password: store.password
+            username: data.username,
+            password: data.password
           }
         };
       });
 
-      this.log('[PAIR] Returning devices array:', JSON.stringify(devices, null, 2));
+      this.log('[PAIR] Returning devices array directly from login:', JSON.stringify(devices, null, 2));
       return devices;
     });
   }
