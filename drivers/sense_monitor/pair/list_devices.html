@@ -21,9 +21,7 @@
       name: d.name || 'Sense Monitor',
       data: {
         id: String(d.data?.id || d.id)
-      },
-      store: d.store || { id: String(d.data?.id || d.id) },
-      settings: d.settings || {}
+      }
     }));
 
     Homey.addDevice(formattedDevices, function(err) {
