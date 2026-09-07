@@ -16,15 +16,11 @@
       Homey.alert('No Sense monitors found on this account.');
       return;
     }
-    
-    const formattedDevices = devices.map(d => ({
-      name: d.name || 'Sense Monitor',
-      data: {
-        id: String(d.data?.id || d.id)
-      }
-    }));
 
-    Homey.addDevice(formattedDevices, function(err) {
+    // In Homey SDK v3, when adding devices from a custom view,
+    // Homey.addDevice expects each device in the array to have:
+    // { name, data: { id }, settings }
+    Homey.addDevice(devices, function(err) {
       if (err) {
         Homey.alert(err.message || 'Failed to add device');
         return;

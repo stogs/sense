@@ -71,12 +71,12 @@ class SenseMonitorDriver extends Homey.Driver {
         return {
           name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
           data: {
-            id: String(id),
+            id: String(id)
           },
           settings: {
             username: credentials.username,
-            password: credentials.password,
-          },
+            password: credentials.password
+          }
         };
       });
 
