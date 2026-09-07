@@ -80,7 +80,7 @@ class SenseMonitorDriver extends Homey.Driver {
         };
       });
 
-      this.log('[PAIR] Returning devices array directly:', devices);
+      this.log('[PAIR] Returning devices array directly:', JSON.stringify(devices, null, 2));
       return devices;
     });
   }
