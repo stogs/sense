@@ -16,36 +16,40 @@ class SenseMonitorDriver extends Homey.Driver {
 
   async onPair(session) {
     this.log('[PAIR] onPair session started');
-    let credentials = {};
-
-    session.setHandler('login', async (data) => {
-      this.log('[PAIR] login handler called with username:', data.username ? data.username.replace(/(?<=.{2}).(?=[^@]*?.@)/g, '*') : 'empty');
-      const client = new SenseApiClient();
-      const mfaToken = await client.login(data.username, data.password);
-      if (mfaToken) {
-        throw new Error('MFA is enabled on your Sense account. Please disable MFA in your Sense account.');
-      }
-      
-      const monitorIds = client.session?.monitorIds || [];
-      this.log('[PAIR] Successfully logged in. Found monitor IDs:', monitorIds);
-      if (monitorIds.length === 0) {
-        throw new Error('No Sense monitors found on this account.');
-      }
-
-      credentials.username = data.username;
-      credentials.password = data.password;
-      return true;
-    });
 
     session.setHandler('list_devices', async () => {
       this.log('[PAIR] list_devices handler called');
-      if (!credentials.username) {
-        throw new Error('Credentials missing. Please log in again.');
+      
+      const appSettings = this.homey.settings.get();
+      let username = appSettings.username;
+      let password = appSettings.password;
+
+      this.log('[PAIR] App settings credentials present - username:', !!username, 'password:', !!password);
+
+      if (!username || !password) {
+        throw new Error('Please enter your Sense credentials in the Homey App settings first.');
       }
 
-      const client = new SenseApiClient();
-      await client.login(credentials.username, credentials.password);
-      const monitorIds = client.session?.monitorIds || [1000004169];
+      const client = new SenseApiClient(undefined, {
+        logger: {
+          debug: (msg, ...args) => this.log('[SDK DEBUG]', msg, ...args),
+          info: (msg, ...args) => this.log('[SDK INFO]', msg, ...args),
+          warn: (msg, ...args) => this.error('[SDK WARN]', msg, ...args),
+          error: (msg, ...args) => this.error('[SDK ERROR]', msg, ...args),
+        }
+      });
+
+      const mfaToken = await client.login(username, password);
+      if (mfaToken) {
+        throw new Error('MFA is enabled on your Sense account. Please disable MFA in your Sense account.');
+      }
+
+      const monitorIds = client.session?.monitorIds || [];
+      this.log('[PAIR] Found monitor IDs from API:', monitorIds);
+
+      if (monitorIds.length === 0) {
+        throw new Error('No Sense monitors found on this account.');
+      }
 
       const devices = monitorIds.map((id, index) => {
         return {
@@ -54,13 +58,13 @@ class SenseMonitorDriver extends Homey.Driver {
             id: String(id)
           },
           settings: {
-            username: credentials.username,
-            password: credentials.password
+            username: username,
+            password: password
           }
         };
       });
 
-      this.log('[PAIR] Returning devices array from list_devices:', JSON.stringify(devices, null, 2));
+      this.log('[PAIR] Returning devices array to Homey frontend:', JSON.stringify(devices, null, 2));
       return devices;
     });
   }
