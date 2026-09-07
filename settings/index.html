@@ -24,23 +24,27 @@
     <script type="text/javascript">
         function onHomeyReady(Homey) {
             Homey.get('username', function(err, username) {
-                if (!err && username) {
+                if (!err && username !== undefined && username !== null) {
                     document.getElementById('username').value = username;
                 }
             });
 
             Homey.get('password', function(err, password) {
-                if (!err && password) {
+                if (!err && password !== undefined && password !== null) {
                     document.getElementById('password').value = password;
                 }
             });
 
             document.getElementById('username').addEventListener('change', function() {
-                Homey.set('username', this.value, function(err) {});
+                if (this.value) {
+                    Homey.set('username', this.value, function(err) {});
+                }
             });
 
             document.getElementById('password').addEventListener('change', function() {
-                Homey.set('password', this.value, function(err) {});
+                if (this.value) {
+                    Homey.set('password', this.value, function(err) {});
+                }
             });
 
             Homey.ready();
