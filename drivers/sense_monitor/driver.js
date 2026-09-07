@@ -74,6 +74,9 @@ class SenseMonitorDriver extends Homey.Driver {
           data: {
             id: String(id)
           },
+          store: {
+            id: String(id)
+          },
           settings: {
             username: username,
             password: password
