@@ -6,7 +6,7 @@
   Homey.setTitle('Discovering Sense Monitors');
   Homey.showLoadingOverlay();
 
-  Homey.emit('list_devices', null, function(err, devices) {
+  Homey.emit('list_devices', function(err, devices) {
     Homey.hideLoadingOverlay();
     if (err) {
       Homey.alert(err.message || 'Failed to discover devices');
