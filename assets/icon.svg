@@ -4,13 +4,13 @@
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="100%" stop-color="#1e293b" />
     </linearGradient>
-    <linearGradient id="glowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+    <linearGradient id="electricGrad" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#0ea5e9" />
       <stop offset="50%" stop-color="#38bdf8" />
       <stop offset="100%" stop-color="#f43f5e" />
     </linearGradient>
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feGaussianBlur stdDeviation="10" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
@@ -18,22 +18,20 @@
   <!-- App Background with rounded corners for Homey icon shape -->
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
-  <!-- Outer subtle pulse ring -->
-  <circle cx="256" cy="256" r="170" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.25" />
-  <circle cx="256" cy="256" r="130" fill="none" stroke="#f43f5e" stroke-width="2" opacity="0.2" />
+  <!-- Distinct Sense Energy Text / Branding Badge at the bottom -->
+  <text x="256" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="64" fill="#ffffff" text-anchor="middle" letter-spacing="4">SENSE</text>
 
-  <!-- Embedded official Sense logo shape (Stylized 'S' / Wave form from official branding) -->
-  <g transform="translate(136, 126) scale(0.24)" fill="url(#glowGrad)" filter="url(#glow)">
-    <path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm32-312c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128-57.3-128-128-128zm0 208c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z"/>
-  </g>
+  <!-- Electric Energy Pulse Waves behind lightning -->
+  <path d="M160 200 C180 150, 332 150, 352 200" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" opacity="0.6" />
+  <path d="M130 170 C160 110, 352 110, 382 170" fill="none" stroke="#0ea5e9" stroke-width="6" stroke-linecap="round" opacity="0.4" />
 
-  <!-- Sense Energy Lightning Bolt with Electric Gradient -->
-  <path d="M280 64L112 288h140l-28 160 192-232H264z" 
-        fill="url(#glowGrad)" 
+  <!-- Lightning Bolt -->
+  <path d="M276 50L108 266h136l-24 148 184-216H256z" 
+        fill="url(#electricGrad)" 
         filter="url(#glow)" />
 
-  <!-- Inner highlight for sleek glossy look -->
-  <path d="M272 88L136 272h120l-24 136 160-196H256z" 
+  <!-- Glossy Highlight -->
+  <path d="M268 70L132 250h116l-20 128 156-184H248z" 
         fill="#ffffff" 
-        opacity="0.25" />
+        opacity="0.3" />
 </svg>
