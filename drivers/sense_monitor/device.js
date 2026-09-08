@@ -48,14 +48,8 @@ class SenseMonitorDevice extends Homey.Device {
 
     this.client = new SenseApiClient(undefined, {
       logger: {
-        debug: (msg, ...args) => {
-          console.log('[SENSE DEBUG]', msg, ...args);
-          this.log('[SENSE DEBUG]', msg, ...args);
-        },
-        info: (msg, ...args) => {
-          console.log('[SENSE INFO]', msg, ...args);
-          this.log('[SENSE INFO]', msg, ...args);
-        },
+        debug: () => {},
+        info: () => {},
         warn: (msg, ...args) => {
           console.warn('[SENSE WARN]', msg, ...args);
           this.error('[SENSE WARN]', msg, ...args);
