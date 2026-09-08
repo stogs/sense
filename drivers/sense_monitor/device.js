@@ -161,10 +161,10 @@ class SenseMonitorDevice extends Homey.Device {
     const gridPower = payload.grid_w !== undefined ? payload.grid_w : power;
     const netPower = gridPower - solarPower;
 
-    this.setCapabilityValue('measure_power', Number(power) || 0).catch(this.error);
-    this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0).catch(this.error);
-    this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0).catch(this.error);
-    this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(this.error);
+    this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
+    this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0).catch(err => this.error('Failed to set solar:', err.message));
+    this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0).catch(err => this.error('Failed to set grid:', err.message));
+    this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(err => this.error('Failed to set net:', err.message));
   }
 
   async onAdded() {
