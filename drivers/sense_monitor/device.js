@@ -120,6 +120,7 @@ class SenseMonitorDevice extends Homey.Device {
 
         if (this.hasCapability('measure_power')) {
           await this.setCapabilityValue('measure_power', Number(power) || 0);
+          this.log(`Successfully set capability measure_power to ${Number(power) || 0}`);
         }
         if (this.hasCapability('measure_power.solar')) {
           await this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0);
@@ -135,6 +136,7 @@ class SenseMonitorDevice extends Homey.Device {
         if (this.hasCapability('meter_power')) {
           const energyKwh = overview.consumption && overview.consumption.energy !== undefined ? overview.consumption.energy : 0;
           await this.setCapabilityValue('meter_power', Number(energyKwh) || 0);
+          this.log(`Successfully set capability meter_power to ${Number(energyKwh) || 0}`);
         }
       }
     } catch (err) {
