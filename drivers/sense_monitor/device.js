@@ -96,11 +96,8 @@ class SenseMonitorDevice extends Homey.Device {
         this.log('Failed to start real-time updates feed, falling back to polling:', wsErr.message);
       }
 
-      // Poll data every 30 seconds as well as backup/initial
+      // Do not poll via overview REST (which returns 0 for overview power), rely entirely on realtime websocket feed
       if (this.pollInterval) clearInterval(this.pollInterval);
-      this.pollInterval = setInterval(async () => {
-        await this.updateData();
-      }, 30 * 1000);
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
