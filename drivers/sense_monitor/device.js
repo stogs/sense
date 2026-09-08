@@ -100,34 +100,23 @@ class SenseMonitorDevice extends Homey.Device {
     try {
       if (!this.monitorId) return;
 
-      const status = await this.client.getMonitorStatus(this.monitorId);
-      this.log('Sense monitor status response:', JSON.stringify(status, null, 2));
+      const status = await this.client.getMonitorOverview(this.monitorId);
+      this.log('Sense monitor overview response:', JSON.stringify(status, null, 2));
 
       if (status) {
-        // Sense getMonitorStatus returns top-level w, solar_w, grid_w, etc.
-        const power = status.w !== undefined ? status.w : (status.consumption && status.consumption.power !== undefined ? status.consumption.power : 0);
-        const solarPower = status.solar_w !== undefined ? status.solar_w : (status.solar && status.solar.power !== undefined ? status.solar.power : 0);
-        const gridPower = status.grid_w !== undefined ? status.grid_w : (status.grid && status.grid.power !== undefined ? status.grid.power : power);
-        const netPower = gridPower - solarPower;
-
-        this.log(`Status update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
+        // Sense getMonitorOverview returns consumption power as status.w or status.consumption.power
+        const power = status.w !== undefined ? status.w : (status.consumption && status.consumption.power !== undefined ? status.consumption.power : (status.power !== undefined ? status.power : 0));
+        
+        this.log(`Overview update parsed: Power=${power}W`);
 
         if (this.hasCapability('measure_power')) {
           await this.setCapabilityValue('measure_power', Number(power) || 0);
           this.log(`Successfully set capability measure_power to ${Number(power) || 0}`);
         }
-        if (this.hasCapability('measure_power.solar')) {
-          await this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0);
-        }
-        if (this.hasCapability('measure_power.grid')) {
-          await this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0);
-        }
-        if (this.hasCapability('measure_power.net')) {
-          await this.setCapabilityValue('measure_power.net', Number(netPower) || 0);
-        }
 
         if (this.hasCapability('meter_power')) {
-          const energyKwh = status.energy !== undefined ? status.energy : (status.consumption && status.consumption.energy !== undefined ? status.consumption.energy : 0);
+          // Calculate or fetch energy if available in overview, or estimate/default to accumulated
+          const energyKwh = status.energy !== undefined ? status.energy : 0;
           await this.setCapabilityValue('meter_power', Number(energyKwh) || 0);
           this.log(`Successfully set capability meter_power to ${Number(energyKwh) || 0}`);
         }

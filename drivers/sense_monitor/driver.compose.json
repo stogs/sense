@@ -41,10 +41,7 @@
   ],
   "capabilities": [
     "measure_power",
-    "meter_power",
-    "measure_power.solar",
-    "measure_power.grid",
-    "measure_power.net"
+    "meter_power"
   ],
   "pair": [
     {
