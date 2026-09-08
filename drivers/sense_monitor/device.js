@@ -90,6 +90,19 @@ class SenseMonitorDevice extends Homey.Device {
         await this.updateData();
       }, 5 * 60 * 1000);
 
+      try {
+        await this.client.startRealtimeUpdates(this.monitorId);
+        this.log('Real-time updates connection started for power updates.');
+      } catch (wsErr) {
+        this.log('Could not start real-time updates:', wsErr.message);
+      }
+
+      this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
+        if (data.type === 'data_change' && data.payload) {
+          this.handleRealtimeData(data.payload);
+        }
+      });
+
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
       this.setUnavailable(`Failed to connect: ${err.message}`);
@@ -141,20 +154,16 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   handleRealtimeData(payload) {
-    this.log('Realtime WebSocket payload received:', JSON.stringify(payload));
-    // Payload typically contains w (active power) etc.
-    if (payload.w !== undefined) {
-      const power = payload.w;
-      this.setCapabilityValue('measure_power', power).catch(this.error);
-    }
-    if (payload.solar_w !== undefined) {
-      const solarPower = payload.solar_w;
-      this.setCapabilityValue('measure_power.solar', solarPower).catch(this.error);
-    }
-    if (payload.grid_w !== undefined) {
-      const gridPower = payload.grid_w;
-      this.setCapabilityValue('measure_power.grid', gridPower).catch(this.error);
-    }
+    // Payload contains total power 'w', 'grid_w', 'solar_w', etc.
+    const power = payload.w !== undefined ? payload.w : 0;
+    const solarPower = payload.solar_w !== undefined ? payload.solar_w : 0;
+    const gridPower = payload.grid_w !== undefined ? payload.grid_w : power;
+    const netPower = gridPower - solarPower;
+
+    this.setCapabilityValue('measure_power', Number(power) || 0).catch(this.error);
+    this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0).catch(this.error);
+    this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0).catch(this.error);
+    this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(this.error);
   }
 
   async onAdded() {
