@@ -96,8 +96,13 @@ class SenseMonitorDevice extends Homey.Device {
         this.log('Failed to start real-time updates feed, falling back to polling:', wsErr.message);
       }
 
-      // Do not poll via overview REST (which returns 0 for overview power), rely entirely on realtime websocket feed
+      // Fetch initial trends data immediately and poll every 15 minutes for energy totals
+      await this.updateData();
+
       if (this.pollInterval) clearInterval(this.pollInterval);
+      this.pollInterval = setInterval(async () => {
+        await this.updateData();
+      }, 15 * 60 * 1000);
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
@@ -106,7 +111,19 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   async updateData() {
-    // Disabled overview polling to prevent overwriting realtime power with 0W
+    try {
+      if (!this.monitorId) return;
+      const trends = await this.client.getMonitorTrends(this.monitorId, 'America/New_York', 'DAY');
+      if (trends && trends.consumption) {
+        const totalKwh = trends.consumption.total !== undefined ? trends.consumption.total : 0;
+        this.log(`[TRENDS] Updated daily energy consumption total: ${totalKwh} kWh`);
+        if (this.hasCapability('meter_power')) {
+          await this.setCapabilityValue('meter_power', Number(totalKwh) || 0);
+        }
+      }
+    } catch (err) {
+      this.error('Error fetching trends/energy data:', err.message);
+    }
   }
 
   handleRealtimeData(payload) {
