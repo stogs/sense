@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="electricGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Clean Opaque Solid Background (No transparent/white corners) -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- SENSE Branding Text -->
+  <text x="256" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="64" fill="#ffffff" text-anchor="middle" letter-spacing="6">SENSE</text>
+
+  <!-- Electric Energy Pulse Waves -->
+  <path d="M150 190 C180 130, 332 130, 362 190" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" opacity="0.7" />
+  <path d="M110 150 C150 80, 362 80, 402 150" fill="none" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+
+  <!-- Vibrant Lightning Bolt -->
+  <path d="M280 40L96 276h144l-28 160 200-232H264z" 
+        fill="url(#electricGrad)" 
+        filter="url(#glow)" />
+
+  <!-- Crisp Highlight -->
+  <path d="M272 64L120 260h128l-24 136 172-200H252z" 
+        fill="#ffffff" 
+        opacity="0.35" />
+</svg>
