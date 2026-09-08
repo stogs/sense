@@ -81,10 +81,25 @@ class SenseMonitorDevice extends Homey.Device {
 
       this.setAvailable();
 
-      // Fetch initial data immediately
+      // Fetch initial status immediately
       await this.updateData();
 
-      // Poll data every 5 minutes (300,000 ms) using REST overview API
+      // Start real-time WebSocket connection (like Home Assistant)
+      try {
+        await this.client.startRealtimeUpdates(this.monitorId);
+        this.log('Real-time updates connection started successfully.');
+      } catch (wsErr) {
+        this.log('Could not start real-time updates:', wsErr.message);
+      }
+
+      this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
+        const payload = data.payload || data;
+        if (payload && payload.w !== undefined) {
+          this.handleRealtimeData(payload);
+        }
+      });
+
+      // Fallback polling every 5 minutes just in case WebSocket disconnects
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
