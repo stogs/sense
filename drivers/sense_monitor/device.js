@@ -100,17 +100,23 @@ class SenseMonitorDevice extends Homey.Device {
     try {
       if (!this.monitorId) return;
 
-      const status = await this.client.getMonitorStatus(this.monitorId);
-      this.log('Sense monitor status response:', JSON.stringify(status, null, 2));
+      const overview = await this.client.getMonitorOverview(this.monitorId);
+      this.log('Sense monitor overview response:', JSON.stringify(overview, null, 2));
 
-      if (status) {
-        // Sense status/realtime fields: w, solar_w, grid_w, etc.
-        const power = status.w !== undefined ? status.w : (status.consumption !== undefined ? (typeof status.consumption === 'object' ? status.consumption.power : status.consumption) : 0);
-        const solarPower = status.solar_w !== undefined ? status.solar_w : (status.solar !== undefined ? (typeof status.solar === 'object' ? status.solar.power : status.solar) : 0);
-        const gridPower = status.grid_w !== undefined ? status.grid_w : (status.grid !== undefined ? (typeof status.grid === 'object' ? status.grid.power : status.grid) : power);
+      if (overview) {
+        // Sense getMonitorOverview returns:
+        // {
+        //   "consumption": { "power": 123, "energy": ... },
+        //   "solar": { "power": 0, ... },
+        //   "grid": { "power": 123, ... },
+        //   ...
+        // }
+        const power = overview.consumption && overview.consumption.power !== undefined ? overview.consumption.power : (overview.w !== undefined ? overview.w : 0);
+        const solarPower = overview.solar && overview.solar.power !== undefined ? overview.solar.power : (overview.solar_w !== undefined ? overview.solar_w : 0);
+        const gridPower = overview.grid && overview.grid.power !== undefined ? overview.grid.power : (overview.grid_w !== undefined ? overview.grid_w : power);
         const netPower = gridPower - solarPower;
 
-        this.log(`Status update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
+        this.log(`Overview update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
 
         if (this.hasCapability('measure_power')) {
           await this.setCapabilityValue('measure_power', Number(power) || 0);
