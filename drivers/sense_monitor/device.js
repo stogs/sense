@@ -100,23 +100,17 @@ class SenseMonitorDevice extends Homey.Device {
     try {
       if (!this.monitorId) return;
 
-      const overview = await this.client.getMonitorOverview(this.monitorId);
-      this.log('Sense monitor overview response:', JSON.stringify(overview, null, 2));
+      const status = await this.client.getMonitorStatus(this.monitorId);
+      this.log('Sense monitor status response:', JSON.stringify(status, null, 2));
 
-      if (overview) {
-        // Sense getMonitorOverview returns:
-        // {
-        //   "consumption": { "power": 123, "energy": ... },
-        //   "solar": { "power": 0, ... },
-        //   "grid": { "power": 123, ... },
-        //   ...
-        // }
-        const power = overview.consumption && overview.consumption.power !== undefined ? overview.consumption.power : (overview.w !== undefined ? overview.w : 0);
-        const solarPower = overview.solar && overview.solar.power !== undefined ? overview.solar.power : (overview.solar_w !== undefined ? overview.solar_w : 0);
-        const gridPower = overview.grid && overview.grid.power !== undefined ? overview.grid.power : (overview.grid_w !== undefined ? overview.grid_w : power);
+      if (status) {
+        // Sense getMonitorStatus returns top-level w, solar_w, grid_w, etc.
+        const power = status.w !== undefined ? status.w : (status.consumption && status.consumption.power !== undefined ? status.consumption.power : 0);
+        const solarPower = status.solar_w !== undefined ? status.solar_w : (status.solar && status.solar.power !== undefined ? status.solar.power : 0);
+        const gridPower = status.grid_w !== undefined ? status.grid_w : (status.grid && status.grid.power !== undefined ? status.grid.power : power);
         const netPower = gridPower - solarPower;
 
-        this.log(`Overview update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
+        this.log(`Status update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
 
         if (this.hasCapability('measure_power')) {
           await this.setCapabilityValue('measure_power', Number(power) || 0);
@@ -132,9 +126,8 @@ class SenseMonitorDevice extends Homey.Device {
           await this.setCapabilityValue('measure_power.net', Number(netPower) || 0);
         }
 
-        // Also update meter_power (energy in kWh if available)
         if (this.hasCapability('meter_power')) {
-          const energyKwh = overview.consumption && overview.consumption.energy !== undefined ? overview.consumption.energy : 0;
+          const energyKwh = status.energy !== undefined ? status.energy : (status.consumption && status.consumption.energy !== undefined ? status.consumption.energy : 0);
           await this.setCapabilityValue('meter_power', Number(energyKwh) || 0);
           this.log(`Successfully set capability meter_power to ${Number(energyKwh) || 0}`);
         }
