@@ -98,8 +98,11 @@ class SenseMonitorDevice extends Homey.Device {
       }
 
       this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
-        if (data.type === 'data_change' && data.payload) {
-          this.handleRealtimeData(data.payload);
+        // Log event type to understand structure
+        this.log('realtimeUpdate received type:', data.type, 'has payload:', !!data.payload);
+        const payload = data.payload || data;
+        if (payload && payload.w !== undefined) {
+          this.handleRealtimeData(payload);
         }
       });
 
