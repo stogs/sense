@@ -136,8 +136,6 @@ class SenseMonitorDevice extends Homey.Device {
     }
     this._lastRealtimeUpdate = now;
 
-    this.log(`[REALTIME] Received live power: ${power}W`);
-
     if (this.hasCapability('measure_power')) {
       this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
     }
