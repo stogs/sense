@@ -22,6 +22,11 @@
   <circle cx="256" cy="256" r="170" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.25" />
   <circle cx="256" cy="256" r="130" fill="none" stroke="#f43f5e" stroke-width="2" opacity="0.2" />
 
+  <!-- Embedded official Sense logo shape (Stylized 'S' / Wave form from official branding) -->
+  <g transform="translate(136, 126) scale(0.24)" fill="url(#glowGrad)" filter="url(#glow)">
+    <path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm32-312c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128-57.3-128-128-128zm0 208c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z"/>
+  </g>
+
   <!-- Sense Energy Lightning Bolt with Electric Gradient -->
   <path d="M280 64L112 288h140l-28 160 192-232H264z" 
         fill="url(#glowGrad)" 
