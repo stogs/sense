@@ -1,4 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="96" fill="#0052cc"/>
-  <path d="M256 96L96 288h128l-32 128 192-224H224z" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- App Background with rounded corners for Homey icon shape -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Outer subtle pulse ring -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.25" />
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#f43f5e" stroke-width="2" opacity="0.2" />
+
+  <!-- Sense Energy Lightning Bolt with Electric Gradient -->
+  <path d="M280 64L112 288h140l-28 160 192-232H264z" 
+        fill="url(#glowGrad)" 
+        filter="url(#glow)" />
+
+  <!-- Inner highlight for sleek glossy look -->
+  <path d="M272 88L136 272h120l-24 136 160-196H256z" 
+        fill="#ffffff" 
+        opacity="0.25" />
 </svg>
