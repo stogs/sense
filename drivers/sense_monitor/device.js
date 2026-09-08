@@ -106,42 +106,7 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   async updateData() {
-    try {
-      if (!this.monitorId) return;
-
-      const status = await this.client.getMonitorOverview(this.monitorId);
-      this.log('Sense monitor overview response:', JSON.stringify(status, null, 2));
-
-      if (status) {
-        // Sense getMonitorOverview returns consumption power as status.w or status.consumption.power
-        const power = status.w !== undefined ? status.w : (status.consumption && status.consumption.power !== undefined ? status.consumption.power : (status.power !== undefined ? status.power : 0));
-        
-        this.log(`Overview update parsed: Power=${power}W`);
-
-        if (this.hasCapability('measure_power')) {
-          await this.setCapabilityValue('measure_power', Number(power) || 0);
-          this.log(`Successfully set capability measure_power to ${Number(power) || 0}`);
-        }
-
-        if (this.hasCapability('meter_power')) {
-          // Calculate or fetch energy if available in overview, or estimate/default to accumulated
-          const energyKwh = status.energy !== undefined ? status.energy : 0;
-          await this.setCapabilityValue('meter_power', Number(energyKwh) || 0);
-          this.log(`Successfully set capability meter_power to ${Number(energyKwh) || 0}`);
-        }
-      }
-    } catch (err) {
-      this.error('Error updating Sense monitor data:', err);
-      // Try to re-login if unauthenticated
-      if (err.name === 'UnauthenticatedError' || (err.message && err.message.includes('401'))) {
-        try {
-          const settings = this.getSettings();
-          await this.client.login(settings.username, settings.password);
-        } catch (loginErr) {
-          this.error('Re-login failed:', loginErr);
-        }
-      }
-    }
+    // Disabled overview polling to prevent overwriting realtime power with 0W
   }
 
   handleRealtimeData(payload) {
