@@ -1,20 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e293b" />
-    </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
-    </filter>
-  </defs>
+  <!-- Solid opaque white square background (no rounded corners so it fills the device card square precisely) -->
+  <rect width="512" height="512" fill="#ffffff" />
 
-  <!-- Solid Dark Slate Background with NO transparency -->
-  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
-
-  <!-- Centered White Circle -->
-  <circle cx="256" cy="256" r="160" fill="#ffffff" filter="url(#shadow)" />
-
-  <!-- Perfectly Centered Red House Shape -->
-  <path d="M 256 128 L 140 215 V 360 H 210 V 270 H 302 V 360 H 372 V 215 Z" fill="#F9461C" />
+  <!-- Centered Red House Icon -->
+  <path d="M 256 110 L 100 230 V 400 H 210 V 290 H 302 V 400 H 412 V 230 Z" fill="#F9461C" />
 </svg>
