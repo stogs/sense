@@ -1,24 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e293b" />
-    </linearGradient>
-    <linearGradient id="senseOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff5722" />
-      <stop offset="100%" stop-color="#f43f5e" />
+      <stop offset="0%" stop-color="#0052cc" />
+      <stop offset="100%" stop-color="#003399" />
     </linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.4"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <!-- Solid Opaque Background with Homey rounded corner radius -->
+  <!-- Clean Solid Blue App Background (Standard Homey App Icon Style) -->
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
-  <!-- Official Sense Energy Home Icon / House & Solar / Energy Motif -->
-  <g transform="translate(106, 106) scale(6)" filter="url(#shadow)">
-    <!-- House outline & energy waveform matching official Sense visual identity -->
-    <path d="M20.9296 7L10.4648 0L0 7V19H3.9866V24L11.5113 19H20.9296V7Z" fill="url(#senseOrange)"/>
-  </g>
+  <!-- Crisp White Lightning Bolt -->
+  <path d="M280 64L112 288h128l-24 160 192-224H240z" 
+        fill="#ffffff" 
+        filter="url(#shadow)" />
 </svg>
