@@ -84,22 +84,7 @@ class SenseMonitorDevice extends Homey.Device {
       // Fetch initial status immediately
       await this.updateData();
 
-      // Start real-time WebSocket connection (like Home Assistant)
-      try {
-        await this.client.startRealtimeUpdates(this.monitorId);
-        this.log('Real-time updates connection started successfully.');
-      } catch (wsErr) {
-        this.log('Could not start real-time updates:', wsErr.message);
-      }
-
-      this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
-        const payload = data.payload || data;
-        if (payload && payload.w !== undefined) {
-          this.handleRealtimeData(payload);
-        }
-      });
-
-      // Fallback polling every 5 minutes just in case WebSocket disconnects
+      // Poll data every 5 minutes using REST getMonitorStatus instead of WebSockets
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
@@ -115,17 +100,23 @@ class SenseMonitorDevice extends Homey.Device {
     try {
       if (!this.monitorId) return;
 
-      const status = await this.client.getMonitorStatus(this.monitorId);
-      this.log('Sense monitor status response:', JSON.stringify(status, null, 2));
+      const overview = await this.client.getMonitorOverview(this.monitorId);
+      this.log('Sense monitor overview response:', JSON.stringify(overview, null, 2));
 
-      if (status) {
-        // Sense getMonitorStatus returns top-level w, solar_w, grid_w etc.
-        const power = status.w !== undefined ? status.w : 0;
-        const solarPower = status.solar_w !== undefined ? status.solar_w : 0;
-        const gridPower = status.grid_w !== undefined ? status.grid_w : power;
+      if (overview) {
+        // Sense getMonitorOverview returns:
+        // {
+        //   "consumption": { "power": 123, "energy": ... },
+        //   "solar": { "power": 0, ... },
+        //   "grid": { "power": 123, ... },
+        //   ...
+        // }
+        const power = overview.consumption && overview.consumption.power !== undefined ? overview.consumption.power : (overview.w !== undefined ? overview.w : 0);
+        const solarPower = overview.solar && overview.solar.power !== undefined ? overview.solar.power : (overview.solar_w !== undefined ? overview.solar_w : 0);
+        const gridPower = overview.grid && overview.grid.power !== undefined ? overview.grid.power : (overview.grid_w !== undefined ? overview.grid_w : power);
         const netPower = gridPower - solarPower;
 
-        this.log(`Status update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
+        this.log(`Overview update parsed: Power=${power}W, Solar=${solarPower}W, Grid=${gridPower}W, Net=${netPower}W`);
 
         if (this.hasCapability('measure_power')) {
           await this.setCapabilityValue('measure_power', Number(power) || 0);
@@ -138,6 +129,12 @@ class SenseMonitorDevice extends Homey.Device {
         }
         if (this.hasCapability('measure_power.net')) {
           await this.setCapabilityValue('measure_power.net', Number(netPower) || 0);
+        }
+
+        // Also update meter_power (energy in kWh if available)
+        if (this.hasCapability('meter_power')) {
+          const energyKwh = overview.consumption && overview.consumption.energy !== undefined ? overview.consumption.energy : 0;
+          await this.setCapabilityValue('meter_power', Number(energyKwh) || 0);
         }
       }
     } catch (err) {
