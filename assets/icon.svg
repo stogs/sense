@@ -4,34 +4,21 @@
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="100%" stop-color="#1e293b" />
     </linearGradient>
-    <linearGradient id="electricGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#0ea5e9" />
-      <stop offset="50%" stop-color="#38bdf8" />
+    <linearGradient id="senseOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5722" />
       <stop offset="100%" stop-color="#f43f5e" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="10" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.4"/>
     </filter>
   </defs>
 
-  <!-- App Background with rounded corners for Homey icon shape -->
+  <!-- Solid Opaque Background with Homey rounded corner radius -->
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
-  <!-- Distinct Sense Energy Text / Branding Badge at the bottom -->
-  <text x="256" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="64" fill="#ffffff" text-anchor="middle" letter-spacing="4">SENSE</text>
-
-  <!-- Electric Energy Pulse Waves behind lightning -->
-  <path d="M160 200 C180 150, 332 150, 352 200" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" opacity="0.6" />
-  <path d="M130 170 C160 110, 352 110, 382 170" fill="none" stroke="#0ea5e9" stroke-width="6" stroke-linecap="round" opacity="0.4" />
-
-  <!-- Lightning Bolt -->
-  <path d="M276 50L108 266h136l-24 148 184-216H256z" 
-        fill="url(#electricGrad)" 
-        filter="url(#glow)" />
-
-  <!-- Glossy Highlight -->
-  <path d="M268 70L132 250h116l-20 128 156-184H248z" 
-        fill="#ffffff" 
-        opacity="0.3" />
+  <!-- Official Sense Energy Home Icon / House & Solar / Energy Motif -->
+  <g transform="translate(106, 106) scale(6)" filter="url(#shadow)">
+    <!-- House outline & energy waveform matching official Sense visual identity -->
+    <path d="M20.9296 7L10.4648 0L0 7V19H3.9866V24L11.5113 19H20.9296V7Z" fill="url(#senseOrange)"/>
+  </g>
 </svg>
