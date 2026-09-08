@@ -84,27 +84,11 @@ class SenseMonitorDevice extends Homey.Device {
       // Fetch initial data immediately
       await this.updateData();
 
-      // Poll data every 5 minutes (300,000 ms)
+      // Poll data every 5 minutes (300,000 ms) using REST overview API
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
       }, 5 * 60 * 1000);
-
-      try {
-        await this.client.startRealtimeUpdates(this.monitorId);
-        this.log('Real-time updates connection started for power updates.');
-      } catch (wsErr) {
-        this.log('Could not start real-time updates:', wsErr.message);
-      }
-
-      this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
-        // Log event type to understand structure
-        this.log('realtimeUpdate received type:', data.type, 'has payload:', !!data.payload);
-        const payload = data.payload || data;
-        if (payload && payload.w !== undefined) {
-          this.handleRealtimeData(payload);
-        }
-      });
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
