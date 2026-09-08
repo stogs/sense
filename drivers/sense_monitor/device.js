@@ -81,14 +81,26 @@ class SenseMonitorDevice extends Homey.Device {
 
       this.setAvailable();
 
-      // Fetch initial status immediately
-      await this.updateData();
+      // Fetch real-time updates via SDK startRealtimeUpdates if available, or fall back to startRealtimeUpdates
+      try {
+        if (typeof this.client.startRealtimeUpdates === 'function') {
+          this.log('Starting Sense real-time updates websocket feed...');
+          await this.client.startRealtimeUpdates(this.monitorId);
+          this.client.emitter.on('realtimeUpdate', (monitorId, data) => {
+            if (String(monitorId) === String(this.monitorId)) {
+              this.handleRealtimeData(data.payload || data);
+            }
+          });
+        }
+      } catch (wsErr) {
+        this.log('Failed to start real-time updates feed, falling back to polling:', wsErr.message);
+      }
 
-      // Poll data every 5 minutes using REST getMonitorStatus instead of WebSockets
+      // Poll data every 30 seconds as well as backup/initial
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         await this.updateData();
-      }, 5 * 60 * 1000);
+      }, 30 * 1000);
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
@@ -138,14 +150,11 @@ class SenseMonitorDevice extends Homey.Device {
   handleRealtimeData(payload) {
     // Payload contains total power 'w', 'grid_w', 'solar_w', etc.
     const power = payload.w !== undefined ? payload.w : 0;
-    const solarPower = payload.solar_w !== undefined ? payload.solar_w : 0;
-    const gridPower = payload.grid_w !== undefined ? payload.grid_w : power;
-    const netPower = gridPower - solarPower;
+    this.log(`[REALTIME] Received live power: ${power}W`);
 
-    this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
-    this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0).catch(err => this.error('Failed to set solar:', err.message));
-    this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0).catch(err => this.error('Failed to set grid:', err.message));
-    this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(err => this.error('Failed to set net:', err.message));
+    if (this.hasCapability('measure_power')) {
+      this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
+    }
   }
 
   async onAdded() {
