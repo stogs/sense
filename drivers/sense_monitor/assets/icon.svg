@@ -5,18 +5,16 @@
       <stop offset="100%" stop-color="#1e293b" />
     </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.4"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <!-- Solid Dark Slate App Background with Homey rounded corners -->
+  <!-- Solid Dark Slate Background with NO transparency -->
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
-  <!-- Centered White Circle Badge -->
-  <circle cx="256" cy="256" r="140" fill="#ffffff" filter="url(#shadow)" />
+  <!-- Centered White Circle -->
+  <circle cx="256" cy="256" r="160" fill="#ffffff" filter="url(#shadow)" />
 
-  <!-- Centered Red House Icon (Official Sense Logo House shape) -->
-  <g transform="translate(156, 156) scale(4.8)" fill="#F9461C">
-    <path d="M20.9296 7L10.4648 0L0 7V19H3.9866V24L11.5113 19H20.9296V7Z"/>
-  </g>
+  <!-- Perfectly Centered Red House Shape -->
+  <path d="M 256 128 L 140 215 V 360 H 210 V 270 H 302 V 360 H 372 V 215 Z" fill="#F9461C" />
 </svg>
