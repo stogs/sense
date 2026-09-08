@@ -127,8 +127,15 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   handleRealtimeData(payload) {
-    // Payload contains total power 'w', 'grid_w', 'solar_w', etc.
     const power = payload.w !== undefined ? payload.w : 0;
+    
+    // Throttle updates to at most once every 5 seconds to prevent spamming logs and capability changes
+    const now = Date.now();
+    if (this._lastRealtimeUpdate && now - this._lastRealtimeUpdate < 5000) {
+      return;
+    }
+    this._lastRealtimeUpdate = now;
+
     this.log(`[REALTIME] Received live power: ${power}W`);
 
     if (this.hasCapability('measure_power')) {
