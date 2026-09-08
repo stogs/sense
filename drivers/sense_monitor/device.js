@@ -139,6 +139,24 @@ class SenseMonitorDevice extends Homey.Device {
     if (this.hasCapability('measure_power')) {
       this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
     }
+
+    // Accumulate energy (meter_power) locally from instantaneous power using time delta (kWh = kW * hours)
+    if (this.hasCapability('meter_power')) {
+      if (this._lastPowerTimestamp && this._lastPowerValue !== undefined) {
+        const timeDeltaHours = (now - this._lastPowerTimestamp) / (1000 * 60 * 60);
+        // Average power in kilowatts over the interval
+        const avgPowerKw = ((this._lastPowerValue + power) / 2) / 1000;
+        const incrementalKwh = avgPowerKw * timeDeltaHours;
+
+        if (incrementalKwh > 0 && incrementalKwh < 1.0) { // sanity check
+          const currentEnergy = this.getCapabilityValue('meter_power') || 0;
+          const newEnergy = Number((currentEnergy + incrementalKwh).toFixed(4));
+          this.setCapabilityValue('meter_power', newEnergy).catch(err => this.error('Failed to set meter_power:', err.message));
+        }
+      }
+      this._lastPowerTimestamp = now;
+      this._lastPowerValue = power;
+    }
   }
 
   async onAdded() {
