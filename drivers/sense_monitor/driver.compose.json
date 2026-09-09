@@ -41,8 +41,28 @@
   ],
   "capabilities": [
     "measure_power",
-    "meter_power"
+    "meter_power",
+    "measure_power.solar",
+    "measure_power.grid",
+    "measure_power.net"
   ],
+  "capabilitiesOptions": {
+    "measure_power.solar": {
+      "title": {
+        "en": "Solar"
+      }
+    },
+    "measure_power.grid": {
+      "title": {
+        "en": "Grid"
+      }
+    },
+    "measure_power.net": {
+      "title": {
+        "en": "Net"
+      }
+    }
+  },
   "pair": [
     {
       "id": "add_device"

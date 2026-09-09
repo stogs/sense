@@ -16,6 +16,23 @@
     "measure_power.grid",
     "measure_power.net"
   ],
+  "capabilitiesOptions": {
+    "measure_power.solar": {
+      "title": {
+        "en": "Solar"
+      }
+    },
+    "measure_power.grid": {
+      "title": {
+        "en": "Grid"
+      }
+    },
+    "measure_power.net": {
+      "title": {
+        "en": "Net"
+      }
+    }
+  },
   "images": {
     "small": "/drivers/sense_monitor/assets/images/small.png",
     "large": "/drivers/sense_monitor/assets/images/large.png"
