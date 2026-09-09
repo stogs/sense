@@ -181,12 +181,13 @@ class SenseMonitorDevice extends Homey.Device {
         const childIdentifier = `sense_device_${dev.id}`;
         
         // Check if child device exists in driver/homey
-        const existingChildren = this.homey.drivers.getDriver('sense_monitor').getDevices().filter(d => d.getData().id === childIdentifier);
+        const driver = this.driver;
+        const existingChildren = driver.getDevices().filter(d => d.getData().id === childIdentifier);
         
         if (existingChildren.length === 0) {
           this.log(`[DEVICES] Creating new child device for Sense appliance: ${dev.name} (${dev.id})`);
           try {
-            await this.homey.drivers.getDriver('sense_monitor').createDevice({
+            await driver.createDevice({
               name: dev.name,
               data: {
                 id: childIdentifier,
