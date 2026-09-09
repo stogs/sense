@@ -213,6 +213,9 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   handleRealtimeData(payload) {
+    // If device was deleted, this._deleted might be set
+    if (this._deleted) return;
+
     // Log payload once to see all properties coming from websocket feed
     if (!this._loggedPayload) {
       this._loggedPayload = true;
@@ -265,10 +268,15 @@ class SenseMonitorDevice extends Homey.Device {
 
   async onDeleted() {
     this.log('SenseMonitorDevice has been deleted');
+    this._deleted = true;
     if (this.pollInterval) clearInterval(this.pollInterval);
     if (this.reconnectInterval) clearInterval(this.reconnectInterval);
     if (this.client && typeof this.client.stopRealtimeUpdates === 'function') {
-      await this.client.stopRealtimeUpdates();
+      try {
+        await this.client.stopRealtimeUpdates();
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
