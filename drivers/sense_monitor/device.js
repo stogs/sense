@@ -143,8 +143,14 @@ class SenseMonitorDevice extends Homey.Device {
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
+      // Fetch today's trends explicitly by passing today's date or checking overview/status if available
+      const overview = typeof this.client.getMonitorOverview === 'function' ? await this.client.getMonitorOverview(this.monitorId) : null;
+      this.log('[OVERVIEW] Monitor overview:', overview ? JSON.stringify(overview) : 'N/A');
+
       const trends = await this.client.getMonitorTrends(this.monitorId, 'America/New_York', 'DAY');
       if (trends && trends.consumption) {
+        // trends.consumption usually has an array of data points or a total. Let's log full structure to be precise.
+        this.log('[TRENDS] Raw consumption object:', JSON.stringify(trends.consumption));
         const totalKwh = trends.consumption.total !== undefined ? trends.consumption.total : 0;
         this.log(`[TRENDS] Updated daily energy consumption total: ${totalKwh} kWh`);
         if (this.hasCapability('meter_power')) {
