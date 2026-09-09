@@ -98,12 +98,14 @@ class SenseMonitorDevice extends Homey.Device {
 
       // Fetch initial trends data immediately and poll every 15 minutes for energy totals & token refresh
       await this.updateData();
+      await this.discoverAndSyncChildDevices();
 
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         try {
           this.log('[POLL] Periodic check / token refresh and trends update...');
           await this.updateData();
+          await this.discoverAndSyncChildDevices();
         } catch (pollErr) {
           this.error('Error during periodic poll:', pollErr.message);
         }
@@ -156,6 +158,47 @@ class SenseMonitorDevice extends Homey.Device {
       }
     } catch (err) {
       this.error('Error fetching trends/energy data:', err.message);
+    }
+  }
+
+  async discoverAndSyncChildDevices() {
+    try {
+      if (!this.monitorId || !this.client) return;
+      const devices = await this.client.getMonitorDevices(this.monitorId);
+      if (!Array.isArray(devices)) return;
+
+      this.log(`[DEVICES] Found ${devices.length} devices from Sense API.`);
+      for (const dev of devices) {
+        if (!dev.id || !dev.name) continue;
+        const childIdentifier = `sense_device_${dev.id}`;
+        let childDevice = this.homey.drivers.getDriver('sense_monitor').getStoreValue(childIdentifier);
+        
+        // Check if child device exists in driver/homey
+        const existingChildren = this.homey.drivers.getDriver('sense_monitor').getDevices().filter(d => d.getData().id === childIdentifier);
+        
+        if (existingChildren.length === 0) {
+          this.log(`[DEVICES] Creating new child device for Sense appliance: ${dev.name} (${dev.id})`);
+          try {
+            await this.homey.drivers.getDriver('sense_monitor').createDevice({
+              name: dev.name,
+              data: {
+                id: childIdentifier,
+                senseDeviceId: dev.id
+              },
+              capabilities: ['measure_power', 'meter_power'],
+              settings: {
+                device_type: dev.type || '',
+                device_make: dev.make || '',
+                device_model: dev.model || ''
+              }
+            });
+          } catch (createErr) {
+            this.error(`Failed to create child device ${dev.name}:`, createErr.message);
+          }
+        }
+      }
+    } catch (err) {
+      this.error('Error discovering child devices:', err.message);
     }
   }
 
