@@ -160,7 +160,16 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   handleRealtimeData(payload) {
+    // Log payload once to see all properties coming from websocket feed
+    if (!this._loggedPayload) {
+      this._loggedPayload = true;
+      this.log('[REALTIME PAYLOAD SAMPLE]:', JSON.stringify(payload));
+    }
+
     const power = payload.w !== undefined ? payload.w : 0;
+    const solarPower = payload.solar_w !== undefined ? payload.solar_w : (payload.solar !== undefined ? payload.solar : 0);
+    const gridPower = payload.grid_w !== undefined ? payload.grid_w : (payload.grid !== undefined ? payload.grid : 0);
+    const netPower = payload.net_w !== undefined ? payload.net_w : (payload.net !== undefined ? payload.net : power);
     
     // Throttle updates to at most once every 5 seconds to prevent spamming logs and capability changes
     const now = Date.now();
@@ -171,6 +180,15 @@ class SenseMonitorDevice extends Homey.Device {
 
     if (this.hasCapability('measure_power')) {
       this.setCapabilityValue('measure_power', Number(power) || 0).catch(err => this.error('Failed to set measure_power:', err.message));
+    }
+    if (this.hasCapability('measure_power.solar')) {
+      this.setCapabilityValue('measure_power.solar', Number(solarPower) || 0).catch(err => this.error('Failed to set measure_power.solar:', err.message));
+    }
+    if (this.hasCapability('measure_power.grid')) {
+      this.setCapabilityValue('measure_power.grid', Number(gridPower) || 0).catch(err => this.error('Failed to set measure_power.grid:', err.message));
+    }
+    if (this.hasCapability('measure_power.net')) {
+      this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(err => this.error('Failed to set measure_power.net:', err.message));
     }
 
     // Accumulate energy (meter_power) locally from instantaneous power using time delta (kWh = kW * hours)
