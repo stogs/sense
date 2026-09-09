@@ -163,15 +163,22 @@ class SenseMonitorDevice extends Homey.Device {
 
   async discoverAndSyncChildDevices() {
     try {
-      if (!this.monitorId || !this.client) return;
+      if (!this.monitorId || !this.client) {
+        this.log('[DEVICES] Cannot discover child devices: monitorId or client is missing.');
+        return;
+      }
+      this.log(`[DEVICES] Requesting devices for monitor ID ${this.monitorId} from Sense API...`);
       const devices = await this.client.getMonitorDevices(this.monitorId);
-      if (!Array.isArray(devices)) return;
+      this.log('[DEVICES] Raw API response for devices:', JSON.stringify(devices));
+      if (!Array.isArray(devices)) {
+        this.log('[DEVICES] Devices response is not an array:', typeof devices);
+        return;
+      }
 
       this.log(`[DEVICES] Found ${devices.length} devices from Sense API.`);
       for (const dev of devices) {
         if (!dev.id || !dev.name) continue;
         const childIdentifier = `sense_device_${dev.id}`;
-        let childDevice = this.homey.drivers.getDriver('sense_monitor').getStoreValue(childIdentifier);
         
         // Check if child device exists in driver/homey
         const existingChildren = this.homey.drivers.getDriver('sense_monitor').getDevices().filter(d => d.getData().id === childIdentifier);
@@ -192,13 +199,16 @@ class SenseMonitorDevice extends Homey.Device {
                 device_model: dev.model || ''
               }
             });
+            this.log(`[DEVICES] Successfully created child device: ${dev.name}`);
           } catch (createErr) {
             this.error(`Failed to create child device ${dev.name}:`, createErr.message);
           }
+        } else {
+          this.log(`[DEVICES] Child device already exists for: ${dev.name}`);
         }
       }
     } catch (err) {
-      this.error('Error discovering child devices:', err.message);
+      this.error('Error discovering child devices:', err.message, err.stack);
     }
   }
 
