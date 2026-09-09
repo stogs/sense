@@ -1,7 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Solid opaque white square background (no rounded corners so it fills the device card square precisely) -->
-  <rect width="512" height="512" fill="#ffffff" />
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
 
-  <!-- Centered Red House Icon -->
-  <path d="M 256 110 L 100 230 V 400 H 210 V 290 H 302 V 400 H 412 V 230 Z" fill="#F9461C" />
+  <!-- Clean solid white square background filling device card -->
+  <rect width="512" height="512" fill="#ffffff"/>
+
+  <!-- Centered Red House Icon matching official Sense branding -->
+  <path d="M 256 110 L 100 230 V 400 H 210 V 290 H 302 V 400 H 412 V 230 Z" fill="#F9461C" filter="url(#shadow)"/>
 </svg>
