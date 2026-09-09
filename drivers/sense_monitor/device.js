@@ -143,19 +143,19 @@ class SenseMonitorDevice extends Homey.Device {
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
-      const trends = await this.client.getMonitorTrends(this.monitorId, 'America/New_York', 'DAY');
+      const trends = await this.client.getMonitorTrends(this.monitorId, 'America/Chicago', 'DAY');
       if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
-        // trends.consumption.totals is an array of hourly kWh values for the day.
-        // Summing only up to the current hour gives today's actual energy consumed so far!
-        const currentHour = new Date().getHours();
+        // Use monitor's timezone (America/Chicago) to get the correct current hour
+        const currentHour = parseInt(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }), 10) || 0;
         const todaySoFarKwh = trends.consumption.totals.slice(0, currentHour + 1).reduce((acc, val) => acc + (Number(val) || 0), 0);
         
-        this.log(`[TRENDS] Total daily kWh (from API total): ${trends.consumption.total}, Today so far (up to hour ${currentHour}): ${todaySoFarKwh} kWh`);
+        this.log(`[TRENDS] Total daily kWh (API): ${trends.consumption.total}, Chicago Hour: ${currentHour}, Today so far: ${todaySoFarKwh} kWh`);
         if (this.hasCapability('meter_power')) {
           await this.setCapabilityValue('meter_power', Number(todaySoFarKwh.toFixed(3)) || 0);
         }
       }
     } catch (err) {
+      this.error('Error fetching trends/energy data:', err.message);
     }
   }
 
