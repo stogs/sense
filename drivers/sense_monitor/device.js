@@ -96,13 +96,39 @@ class SenseMonitorDevice extends Homey.Device {
         this.log('Failed to start real-time updates feed, falling back to polling:', wsErr.message);
       }
 
-      // Fetch initial trends data immediately and poll every 15 minutes for energy totals
+      // Fetch initial trends data immediately and poll every 15 minutes for energy totals & token refresh
       await this.updateData();
 
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
-        await this.updateData();
+        try {
+          this.log('[POLL] Periodic check / token refresh and trends update...');
+          await this.updateData();
+        } catch (pollErr) {
+          this.error('Error during periodic poll:', pollErr.message);
+        }
       }, 15 * 60 * 1000);
+
+      // Setup periodic WebSocket keepalive / reconnection check every 30 minutes
+      if (this.reconnectInterval) clearInterval(this.reconnectInterval);
+      this.reconnectInterval = setInterval(async () => {
+        try {
+          this.log('[WS CHECK] Checking WebSocket connection state...');
+          if (this.client && typeof this.client.startRealtimeUpdates === 'function') {
+            if (!this.client._socket || this.client._socket.readyState !== WebSocket.OPEN) {
+              this.log('[WS CHECK] WebSocket is not open. Reconnecting...');
+              if (this.client._socket) {
+                await this.client.stopRealtimeUpdates();
+              }
+              await this.client.startRealtimeUpdates(this.monitorId);
+            } else {
+              this.log('[WS CHECK] WebSocket is active and connected.');
+            }
+          }
+        } catch (wsCheckErr) {
+          this.error('Error during WebSocket keepalive check:', wsCheckErr.message);
+        }
+      }, 30 * 60 * 1000);
 
     } catch (err) {
       this.error('Failed to connect to Sense:', err);
@@ -113,6 +139,10 @@ class SenseMonitorDevice extends Homey.Device {
   async updateData() {
     try {
       if (!this.monitorId) return;
+      // Ensure access token is refreshed/valid before making API calls
+      if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
+        await this.client.refreshAccessTokenIfNeeded();
+      }
       const trends = await this.client.getMonitorTrends(this.monitorId, 'America/New_York', 'DAY');
       if (trends && trends.consumption) {
         const totalKwh = trends.consumption.total !== undefined ? trends.consumption.total : 0;
@@ -159,8 +189,13 @@ class SenseMonitorDevice extends Homey.Device {
     }
   }
 
-  async onAdded() {
-    this.log('SenseMonitorDevice has been added');
+  async onDeleted() {
+    this.log('SenseMonitorDevice has been deleted');
+    if (this.pollInterval) clearInterval(this.pollInterval);
+    if (this.reconnectInterval) clearInterval(this.reconnectInterval);
+    if (this.client && typeof this.client.stopRealtimeUpdates === 'function') {
+      await this.client.stopRealtimeUpdates();
+    }
   }
 
   async onSettings({ oldSettings, newSettings, changedKeys }) {
