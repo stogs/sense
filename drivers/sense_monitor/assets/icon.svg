@@ -1,20 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="driverBg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="100%" stop-color="#1e293b" />
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.4"/>
-    </filter>
   </defs>
 
-  <!-- Solid dark slate rounded square background (matching Homey app standards) -->
-  <rect width="512" height="512" rx="112" fill="url(#driverBg)"/>
+  <!-- Solid rounded square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Centered White Circle Badge -->
-  <circle cx="256" cy="256" r="150" fill="#ffffff" filter="url(#glow)"/>
-
-  <!-- Centered Red House Icon -->
-  <path d="M 256 140 L 140 230 V 372 H 210 V 282 H 302 V 372 H 372 V 230 Z" fill="#F9461C"/>
+  <!-- Centered Red House Icon (Clean geometry, filling center nicely) -->
+  <path d="M 256 110 L 100 230 V 410 H 210 V 300 H 302 V 410 H 412 V 230 Z" fill="#F9461C"/>
 </svg>
