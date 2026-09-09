@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e293b" />
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F8FAFC" />
     </linearGradient>
   </defs>
-
-  <!-- Solid rounded square background -->
+  <!-- Clean white rounded square background -->
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Centered Red House Icon (Clean geometry, filling center nicely) -->
-  <path d="M 256 110 L 100 230 V 410 H 210 V 300 H 302 V 410 H 412 V 230 Z" fill="#F9461C"/>
+  <!-- Exact official Sense house logo geometry scaled and centered -->
+  <g transform="translate(106, 120) scale(12.5)">
+    <path d="M20.9296 7L10.4648 0L0 7V19H3.9866V24L11.5113 19H20.9296V7Z" fill="#F9461C"/>
+  </g>
 </svg>
