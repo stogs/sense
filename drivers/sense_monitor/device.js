@@ -143,22 +143,19 @@ class SenseMonitorDevice extends Homey.Device {
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
-      // Fetch today's trends explicitly by passing today's date or checking overview/status if available
-      const overview = typeof this.client.getMonitorOverview === 'function' ? await this.client.getMonitorOverview(this.monitorId) : null;
-      this.log('[OVERVIEW] Monitor overview:', overview ? JSON.stringify(overview) : 'N/A');
-
       const trends = await this.client.getMonitorTrends(this.monitorId, 'America/New_York', 'DAY');
-      if (trends && trends.consumption) {
-        // trends.consumption usually has an array of data points or a total. Let's log full structure to be precise.
-        this.log('[TRENDS] Raw consumption object:', JSON.stringify(trends.consumption));
-        const totalKwh = trends.consumption.total !== undefined ? trends.consumption.total : 0;
-        this.log(`[TRENDS] Updated daily energy consumption total: ${totalKwh} kWh`);
+      if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
+        // trends.consumption.totals is an array of hourly kWh values for the day.
+        // Summing only up to the current hour gives today's actual energy consumed so far!
+        const currentHour = new Date().getHours();
+        const todaySoFarKwh = trends.consumption.totals.slice(0, currentHour + 1).reduce((acc, val) => acc + (Number(val) || 0), 0);
+        
+        this.log(`[TRENDS] Total daily kWh (from API total): ${trends.consumption.total}, Today so far (up to hour ${currentHour}): ${todaySoFarKwh} kWh`);
         if (this.hasCapability('meter_power')) {
-          await this.setCapabilityValue('meter_power', Number(totalKwh) || 0);
+          await this.setCapabilityValue('meter_power', Number(todaySoFarKwh.toFixed(3)) || 0);
         }
       }
     } catch (err) {
-      this.error('Error fetching trends/energy data:', err.message);
     }
   }
 
