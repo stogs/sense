@@ -187,11 +187,17 @@ class SenseMonitorDevice extends Homey.Device {
         if (existingChildren.length === 0) {
           this.log(`[DEVICES] Creating new child device for Sense appliance: ${dev.name} (${dev.id})`);
           try {
+            // In Homey SDK v3, createDevice on driver creates a child device when associated or registered.
+            // Let's ensure parent-child linking or standalone driver creation succeeds.
             await driver.createDevice({
               name: dev.name,
               data: {
                 id: childIdentifier,
                 senseDeviceId: dev.id
+              },
+              store: {
+                senseDeviceId: dev.id,
+                monitorId: this.monitorId
               },
               capabilities: ['measure_power', 'meter_power'],
               settings: {
@@ -202,7 +208,7 @@ class SenseMonitorDevice extends Homey.Device {
             });
             this.log(`[DEVICES] Successfully created child device: ${dev.name}`);
           } catch (createErr) {
-            this.error(`Failed to create child device ${dev.name}:`, createErr.message);
+            this.error(`Failed to create child device ${dev.name}:`, createErr.message, createErr.stack);
           }
         } else {
           this.log(`[DEVICES] Child device already exists for: ${dev.name}`);
