@@ -199,6 +199,8 @@ class SenseMonitorDevice extends Homey.Device {
                 senseDeviceId: dev.id,
                 monitorId: this.monitorId
               },
+              // Link as child device under this parent device in Homey
+              parentId: this.getData().id,
               capabilities: ['measure_power', 'meter_power'],
               settings: {
                 device_type: dev.type || '',
