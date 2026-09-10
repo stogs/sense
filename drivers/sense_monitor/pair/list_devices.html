@@ -1,0 +1,24 @@
+<div class="homey-form-group">
+  <label class="homey-label" for="deviceSearch">Discovering Sense Devices & Appliances...</label>
+  <p class="homey-p">Please wait while we fetch your Sense monitor and discovered devices / smart plugs.</p>
+</div>
+
+<script>
+  Homey.setTitle('Select Sense Devices');
+  Homey.showLoadingOverlay();
+
+  Homey.emit('list_devices', function(err, devices) {
+    Homey.hideLoadingOverlay();
+    if (err) {
+      Homey.alert(err.message || 'Failed to discover devices');
+      return;
+    }
+    if (!devices || devices.length === 0) {
+      Homey.alert('No Sense monitors or devices found.');
+      return;
+    }
+
+    // Pass discovered devices to Homey pairing view selection list
+    Homey.showView('list_devices');
+  });
+</script>

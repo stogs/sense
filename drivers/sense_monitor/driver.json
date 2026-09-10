@@ -39,7 +39,7 @@
   },
   "pair": [
     {
-      "id": "add_device"
+      "id": "list_devices"
     }
   ]
 }
