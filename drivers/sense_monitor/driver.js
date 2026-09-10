@@ -92,6 +92,7 @@ class SenseMonitorDriver extends Homey.Driver {
                   senseDeviceId: dev.id,
                   monitorId: String(id)
                 },
+                parentId: String(id),
                 capabilities: ['measure_power', 'meter_power'],
                 settings: {
                   device_type: dev.type || '',
