@@ -9,7 +9,7 @@ class SenseMonitorDriver extends Homey.Driver {
 
   async createDevice(options) {
     this.log('[PAIR] createDevice called with options:', JSON.stringify(options, null, 2));
-    return this.homey.drivers.getDriver('sense_monitor').createDevice(options);
+    return super.createDevice(options);
   }
 
   async onPair(session) {
