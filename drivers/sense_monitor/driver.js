@@ -7,23 +7,16 @@ class SenseMonitorDriver extends Homey.Driver {
     this.log('SenseMonitorDriver initialized');
   }
 
-  async createDevice({ name, data, store, parentId, capabilities, settings }) {
-    this.log('[DRIVER] createDevice called with options:', JSON.stringify({ name, data, parentId }, null, 2));
-    try {
-      // In Homey SDK v3, driver.createDevice creates a device or child device.
-      // We pass the full options object to super.createDevice.
-      return await super.createDevice({
-        name,
-        data,
-        store,
-        parentId,
-        capabilities,
-        settings
-      });
-    } catch (e) {
-      this.error('[DRIVER] Error in createDevice wrapper:', e.message, e.stack);
-      throw e;
+  async createDevice(options) {
+    this.log('[DRIVER] createDevice called with options:', JSON.stringify(options, null, 2));
+    if (typeof super.createDevice === 'function') {
+      return super.createDevice(options);
     }
+    // Fallback if driver manager or parent lacks createDevice method
+    if (this.homey && this.homey.drivers && typeof this.homey.drivers.createDevice === 'function') {
+      return this.homey.drivers.createDevice(options);
+    }
+    throw new Error('createDevice is not available on driver or homey.drivers');
   }
 
   async onPair(session) {
