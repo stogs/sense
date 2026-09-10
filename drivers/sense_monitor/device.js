@@ -98,14 +98,12 @@ class SenseMonitorDevice extends Homey.Device {
 
       // Fetch initial trends data immediately and poll every 15 minutes for energy totals & token refresh
       await this.updateData();
-      await this.discoverAndSyncChildDevices();
 
       if (this.pollInterval) clearInterval(this.pollInterval);
       this.pollInterval = setInterval(async () => {
         try {
           this.log('[POLL] Periodic check / token refresh and trends update...');
           await this.updateData();
-          await this.discoverAndSyncChildDevices();
         } catch (pollErr) {
           this.error('Error during periodic poll:', pollErr.message);
         }
