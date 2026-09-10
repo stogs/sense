@@ -189,7 +189,7 @@ class SenseMonitorDevice extends Homey.Device {
           try {
             // In Homey SDK v3, createDevice on driver creates a child device when associated or registered.
             // Let's ensure parent-child linking or standalone driver creation succeeds.
-            await this.homey.drivers.getDriver('sense_monitor').createDevice({
+            await driver.createDevice({
               name: dev.name,
               data: {
                 id: childIdentifier,
