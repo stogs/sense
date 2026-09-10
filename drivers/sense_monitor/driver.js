@@ -61,9 +61,10 @@ class SenseMonitorDriver extends Homey.Driver {
         throw new Error('No Sense monitors found on this account.');
       }
 
-      const devices = monitorIds.map((id, index) => {
-        return {
-          name: `Sense Monitor ${index > 0 ? index + 1 : ''}`.trim(),
+      const devices = [];
+      for (const id of monitorIds) {
+        devices.push({
+          name: `Sense Monitor ${monitorIds.length > 1 ? id : ''}`.trim(),
           data: {
             id: String(id)
           },
@@ -74,8 +75,36 @@ class SenseMonitorDriver extends Homey.Driver {
             username: username,
             password: password
           }
-        };
-      });
+        });
+
+        try {
+          const monitorDevices = await client.getMonitorDevices(id);
+          if (Array.isArray(monitorDevices)) {
+            for (const dev of monitorDevices) {
+              if (!dev.id || !dev.name) continue;
+              devices.push({
+                name: dev.name,
+                data: {
+                  id: `sense_device_${dev.id}`,
+                  senseDeviceId: dev.id
+                },
+                store: {
+                  senseDeviceId: dev.id,
+                  monitorId: String(id)
+                },
+                capabilities: ['measure_power', 'meter_power'],
+                settings: {
+                  device_type: dev.type || '',
+                  device_make: dev.make || '',
+                  device_model: dev.model || ''
+                }
+              });
+            }
+          }
+        } catch (devErr) {
+          this.error('[PAIR] Failed to fetch monitor devices for pairing:', devErr.message);
+        }
+      }
 
       this.log('[PAIR] Returning devices array to Homey frontend:', JSON.stringify(devices, null, 2));
       return devices;

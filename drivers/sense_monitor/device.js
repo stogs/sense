@@ -162,37 +162,7 @@ class SenseMonitorDevice extends Homey.Device {
   }
 
   async discoverAndSyncChildDevices() {
-    try {
-      if (!this.monitorId || !this.client) {
-        this.log('[DEVICES] Cannot discover child devices: monitorId or client is missing.');
-        return;
-      }
-      this.log(`[DEVICES] Requesting devices for monitor ID ${this.monitorId} from Sense API...`);
-      const devices = await this.client.getMonitorDevices(this.monitorId);
-      this.log('[DEVICES] Raw API response for devices:', JSON.stringify(devices));
-      if (!Array.isArray(devices)) {
-        this.log('[DEVICES] Devices response is not an array:', typeof devices);
-        return;
-      }
-
-      this.log(`[DEVICES] Found ${devices.length} devices from Sense API.`);
-      for (const dev of devices) {
-        if (!dev.id || !dev.name) continue;
-        const childIdentifier = `sense_device_${dev.id}`;
-        
-        // Check if child device exists in driver/homey
-        const driver = this.driver;
-        const existingChildren = driver.getDevices().filter(d => d.getData().id === childIdentifier);
-        
-        if (existingChildren.length === 0) {
-          this.log(`[DEVICES] Skipping child device creation for appliance: ${dev.name} (${dev.id}) to prevent driver.createDevice invocation error.`);
-        } else {
-          this.log(`[DEVICES] Child device already exists for: ${dev.name}`);
-        }
-      }
-    } catch (err) {
-      this.error('Error discovering child devices:', err.message, err.stack);
-    }
+    // Child devices are added via pairing selection.
   }
 
   handleRealtimeData(payload) {
