@@ -7,32 +7,6 @@ class SenseMonitorDriver extends Homey.Driver {
     this.log('SenseMonitorDriver initialized');
   }
 
-  async createDevice(options) {
-    this.log('[DRIVER] createDevice called with options:', JSON.stringify(options, null, 2));
-    // In Homey SDK v3 apps running locally or in container, driver creation of devices 
-    // is managed via Homey's manager drivers or driver instance methods.
-    // Let's check all possible Homey API surfaces for device creation.
-    try {
-      if (typeof super.createDevice === 'function') {
-        return await super.createDevice(options);
-      }
-    } catch (e) {
-      this.log('[DRIVER] super.createDevice failed:', e.message);
-    }
-
-    if (this.homey && this.homey.app && typeof this.homey.app.createDevice === 'function') {
-      return await this.homey.app.createDevice(options);
-    }
-
-    // Try creating via Homey manager drivers if available
-    const driverId = this.id || 'sense_monitor';
-    if (this.homey && this.homey.api && typeof this.homey.api.post === 'function') {
-      return await this.homey.api.post(`/api/manager/drivers/driver/${driverId}/device`, options);
-    }
-
-    throw new Error('createDevice is not available on driver or homey APIs');
-  }
-
   async onPair(session) {
     this.log('[PAIR] onPair session started');
 
