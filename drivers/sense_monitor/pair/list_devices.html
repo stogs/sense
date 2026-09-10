@@ -1,5 +1,5 @@
 <div class="homey-form-group">
-  <label class="homey-label" for="deviceSearch">Discovering Sense Devices & Appliances...</label>
+  <label class="homey-label">Discovering Sense Devices & Appliances...</label>
   <p class="homey-p">Please wait while we fetch your Sense monitor and discovered devices / smart plugs.</p>
 </div>
 
@@ -18,7 +18,25 @@
       return;
     }
 
-    // Pass discovered devices to Homey pairing view selection list
-    Homey.showView('list_devices');
+    Homey.showSelectView(devices, function(err, selectedDevices) {
+      if (err) {
+        Homey.alert(err.message || 'Failed to select devices');
+        return;
+      }
+      if (!selectedDevices || selectedDevices.length === 0) {
+        Homey.alert('No devices selected.');
+        return;
+      }
+
+      Homey.showLoadingOverlay();
+      Homey.addDevices(selectedDevices, function(err) {
+        Homey.hideLoadingOverlay();
+        if (err) {
+          Homey.alert(err.message || 'Failed to add devices');
+          return;
+        }
+        Homey.done();
+      });
+    });
   });
 </script>
