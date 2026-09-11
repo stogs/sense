@@ -56,7 +56,12 @@ class SenseMonitorDevice extends Homey.Device {
         return;
       }
 
-      this.monitorId = this.getData().id || monitorIds[0];
+      const rawId = this.getData().id;
+      if (rawId && rawId.startsWith('sense_device_')) {
+        this.monitorId = (this.store && this.store.monitorId) || monitorIds[0];
+      } else {
+        this.monitorId = rawId || monitorIds[0];
+      }
       this.log(`Connected to Sense monitor ID: ${this.monitorId}`);
 
       this.setAvailable();
@@ -121,18 +126,15 @@ class SenseMonitorDevice extends Homey.Device {
       }
       const isChild = !!(this.store && this.store.senseDeviceId);
       if (isChild) {
-        this.log(`[TRENDS] Skipping monitor trends update for child device: ${this.store.senseDeviceId}`);
         return;
       }
-      const targetId = this.monitorId;
-      this.log(`[TRENDS] Fetching trends for monitor ID: ${targetId}`);
+      const targetMonitorId = (this.store && this.store.monitorId) || this.monitorId;
       
-      const trends = await this.client.getMonitorTrends(targetId, 'America/Chicago', 'DAY');
+      const trends = await this.client.getMonitorTrends(targetMonitorId, 'America/Chicago', 'DAY');
       if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
         const currentHour = parseInt(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }), 10) || 0;
         const todaySoFarKwh = trends.consumption.totals.slice(0, currentHour + 1).reduce((acc, val) => acc + (Number(val) || 0), 0);
         
-        this.log(`[TRENDS] Total daily kWh (API): ${trends.consumption.total}, Chicago Hour: ${currentHour}, Today so far: ${todaySoFarKwh} kWh`);
         if (this.hasCapability('meter_power')) {
           await this.setCapabilityValue('meter_power', Number(todaySoFarKwh.toFixed(3)) || 0);
         }
