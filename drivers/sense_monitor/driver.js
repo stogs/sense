@@ -24,13 +24,25 @@ class SenseMonitorDriver extends Homey.Driver {
 
       if (!username || !password) {
         try {
-          const appSettings = this.homey.settings.get();
+          const appSettings = this.homey.settings.get('settings');
           if (appSettings) {
             username = username || appSettings.username || '';
             password = password || appSettings.password || '';
           }
         } catch (e) {
-          this.log('[PAIR] Error reading settings via get():', e.message);
+          this.log('[PAIR] Error getting app settings with key:', e.message);
+        }
+
+        if (!username || !password) {
+          try {
+            const rawSettings = this.homey.settings.get();
+            if (rawSettings) {
+              username = username || rawSettings.username || '';
+              password = password || rawSettings.password || '';
+            }
+          } catch (e) {
+            this.log('[PAIR] Error getting raw app settings:', e.message);
+          }
         }
       }
 
