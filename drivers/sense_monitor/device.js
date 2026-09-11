@@ -119,9 +119,13 @@ class SenseMonitorDevice extends Homey.Device {
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
-      const targetId = this.store && this.store.senseDeviceId ? this.store.senseDeviceId : this.monitorId;
       const isChild = !!(this.store && this.store.senseDeviceId);
-      this.log(`[TRENDS] Fetching trends for ${isChild ? 'child device' : 'monitor'} ID: ${targetId}`);
+      if (isChild) {
+        this.log(`[TRENDS] Skipping monitor trends update for child device: ${this.store.senseDeviceId}`);
+        return;
+      }
+      const targetId = this.monitorId;
+      this.log(`[TRENDS] Fetching trends for monitor ID: ${targetId}`);
       
       const trends = await this.client.getMonitorTrends(targetId, 'America/Chicago', 'DAY');
       if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
