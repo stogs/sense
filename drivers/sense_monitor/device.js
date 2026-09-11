@@ -152,11 +152,26 @@ class SenseMonitorDevice extends Homey.Device {
       this.log('[REALTIME PAYLOAD SAMPLE]:', JSON.stringify(payload));
     }
 
-    const power = payload.w !== undefined ? payload.w : 0;
-    const solarPower = payload.solar_w !== undefined ? payload.solar_w : (payload.solar !== undefined ? payload.solar : 0);
-    const gridPower = payload.grid_w !== undefined ? payload.grid_w : (payload.grid !== undefined ? payload.grid : 0);
-    const netPower = payload.net_w !== undefined ? payload.net_w : (payload.net !== undefined ? payload.net : power);
-    
+    const senseDeviceId = this.store && this.store.senseDeviceId;
+    let power = 0;
+    let solarPower = 0;
+    let gridPower = 0;
+    let netPower = 0;
+
+    if (senseDeviceId) {
+      // If this is a child device, find its specific power from payload.devices
+      const devices = payload.devices || [];
+      const matchedDev = devices.find(d => String(d.id) === String(senseDeviceId));
+      power = matchedDev ? (matchedDev.w !== undefined ? matchedDev.w : 0) : 0;
+      netPower = power;
+    } else {
+      // Parent monitor aggregate power
+      power = payload.w !== undefined ? payload.w : 0;
+      solarPower = payload.solar_w !== undefined ? payload.solar_w : (payload.solar !== undefined ? payload.solar : 0);
+      gridPower = payload.grid_w !== undefined ? payload.grid_w : (payload.grid !== undefined ? payload.grid : 0);
+      netPower = payload.net_w !== undefined ? payload.net_w : (payload.net !== undefined ? payload.net : power);
+    }
+
     const now = Date.now();
     if (this._lastRealtimeUpdate && now - this._lastRealtimeUpdate < 5000) {
       return;
