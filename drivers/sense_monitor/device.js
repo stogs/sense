@@ -6,49 +6,9 @@ class SenseMonitorDevice extends Homey.Device {
   async onInit() {
     this.log('SenseMonitorDevice has been initialized');
 
-    let username = '';
-    let password = '';
-    try {
-      const settings = this.getSettings();
-      username = settings && settings.username ? settings.username : '';
-      password = settings && settings.password ? settings.password : '';
-    } catch (e) {
-      this.log('Error getting device settings:', e.message);
-    }
-
-    // Fallback to app-level settings if device settings are empty
-    if (!username || !password) {
-      try {
-        const appSettings = this.homey.settings.get('settings');
-        if (appSettings) {
-          username = username || appSettings.username || '';
-          password = password || appSettings.password || '';
-        }
-      } catch (e) {
-        this.log('Error getting app settings with key:', e.message);
-      }
-
-      if (!username || !password) {
-        try {
-          const rawSettings = this.homey.settings.get();
-          if (rawSettings) {
-            username = username || rawSettings.username || '';
-            password = password || rawSettings.password || '';
-          }
-        } catch (e) {
-          this.log('Error getting raw app settings:', e.message);
-        }
-      }
-
-      if (username && password) {
-        this.log('Inherited credentials from app-level settings.');
-        try {
-          await this.setSettings({ username, password });
-        } catch (e) {
-          this.log('Error setting device settings:', e.message);
-        }
-      }
-    }
+    const settings = this.getSettings();
+    const username = settings.username || this.homey.settings.get('username') || '';
+    const password = settings.password || this.homey.settings.get('password') || '';
 
     this.log('Device settings retrieved. Username present:', !!username, 'Password present:', !!password);
 
@@ -56,6 +16,14 @@ class SenseMonitorDevice extends Homey.Device {
       this.log('Missing username or password in device or app settings!');
       this.setUnavailable('Please configure your Sense credentials in the app settings.');
       return;
+    }
+
+    if (!settings.username || !settings.password) {
+      try {
+        await this.setSettings({ username, password });
+      } catch (e) {
+        this.log('Error saving credentials to device settings:', e.message);
+      }
     }
 
     this.client = new SenseApiClient(undefined, {
@@ -93,7 +61,6 @@ class SenseMonitorDevice extends Homey.Device {
 
       this.setAvailable();
 
-      // Fetch real-time updates via SDK startRealtimeUpdates if available, or fall back to startRealtimeUpdates
       try {
         if (typeof this.client.startRealtimeUpdates === 'function') {
           this.log('Starting Sense real-time updates websocket feed...');
@@ -108,7 +75,6 @@ class SenseMonitorDevice extends Homey.Device {
         this.log('Failed to start real-time updates feed, falling back to polling:', wsErr.message);
       }
 
-      // Fetch initial trends data immediately and poll every 15 minutes for energy totals & token refresh
       await this.updateData();
 
       if (this.pollInterval) clearInterval(this.pollInterval);
@@ -121,7 +87,6 @@ class SenseMonitorDevice extends Homey.Device {
         }
       }, 15 * 60 * 1000);
 
-      // Setup periodic WebSocket keepalive / reconnection check every 30 minutes
       if (this.reconnectInterval) clearInterval(this.reconnectInterval);
       this.reconnectInterval = setInterval(async () => {
         try {
@@ -151,13 +116,11 @@ class SenseMonitorDevice extends Homey.Device {
   async updateData() {
     try {
       if (!this.monitorId) return;
-      // Ensure access token is refreshed/valid before making API calls
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
       const trends = await this.client.getMonitorTrends(this.monitorId, 'America/Chicago', 'DAY');
       if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
-        // Use monitor's timezone (America/Chicago) to get the correct current hour
         const currentHour = parseInt(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }), 10) || 0;
         const todaySoFarKwh = trends.consumption.totals.slice(0, currentHour + 1).reduce((acc, val) => acc + (Number(val) || 0), 0);
         
@@ -171,15 +134,9 @@ class SenseMonitorDevice extends Homey.Device {
     }
   }
 
-  async discoverAndSyncChildDevices() {
-    // Child devices are added via pairing selection.
-  }
-
   handleRealtimeData(payload) {
-    // If device was deleted, this._deleted might be set
     if (this._deleted) return;
 
-    // Log payload once to see all properties coming from websocket feed
     if (!this._loggedPayload) {
       this._loggedPayload = true;
       this.log('[REALTIME PAYLOAD SAMPLE]:', JSON.stringify(payload));
@@ -190,7 +147,6 @@ class SenseMonitorDevice extends Homey.Device {
     const gridPower = payload.grid_w !== undefined ? payload.grid_w : (payload.grid !== undefined ? payload.grid : 0);
     const netPower = payload.net_w !== undefined ? payload.net_w : (payload.net !== undefined ? payload.net : power);
     
-    // Throttle updates to at most once every 5 seconds to prevent spamming logs and capability changes
     const now = Date.now();
     if (this._lastRealtimeUpdate && now - this._lastRealtimeUpdate < 5000) {
       return;
@@ -210,15 +166,13 @@ class SenseMonitorDevice extends Homey.Device {
       this.setCapabilityValue('measure_power.net', Number(netPower) || 0).catch(err => this.error('Failed to set measure_power.net:', err.message));
     }
 
-    // Accumulate energy (meter_power) locally from instantaneous power using time delta (kWh = kW * hours)
     if (this.hasCapability('meter_power')) {
       if (this._lastPowerTimestamp && this._lastPowerValue !== undefined) {
         const timeDeltaHours = (now - this._lastPowerTimestamp) / (1000 * 60 * 60);
-        // Average power in kilowatts over the interval
         const avgPowerKw = ((this._lastPowerValue + power) / 2) / 1000;
         const incrementalKwh = avgPowerKw * timeDeltaHours;
 
-        if (incrementalKwh > 0 && incrementalKwh < 1.0) { // sanity check
+        if (incrementalKwh > 0 && incrementalKwh < 1.0) {
           const currentEnergy = this.getCapabilityValue('meter_power') || 0;
           const newEnergy = Number((currentEnergy + incrementalKwh).toFixed(4));
           this.setCapabilityValue('meter_power', newEnergy).catch(err => this.error('Failed to set meter_power:', err.message));
@@ -247,7 +201,6 @@ class SenseMonitorDevice extends Homey.Device {
     this.log('SenseMonitorDevice settings changed:', changedKeys);
     if (changedKeys.includes('username') || changedKeys.includes('password')) {
       this.log('Credentials updated in settings. Re-initializing device connection...');
-      // Restart initialization or re-trigger connection
       await this.onInit();
     }
   }
