@@ -119,7 +119,11 @@ class SenseMonitorDevice extends Homey.Device {
       if (this.client && typeof this.client.refreshAccessTokenIfNeeded === 'function') {
         await this.client.refreshAccessTokenIfNeeded();
       }
-      const trends = await this.client.getMonitorTrends(this.monitorId, 'America/Chicago', 'DAY');
+      const targetId = this.store && this.store.senseDeviceId ? this.store.senseDeviceId : this.monitorId;
+      const isChild = !!(this.store && this.store.senseDeviceId);
+      this.log(`[TRENDS] Fetching trends for ${isChild ? 'child device' : 'monitor'} ID: ${targetId}`);
+      
+      const trends = await this.client.getMonitorTrends(targetId, 'America/Chicago', 'DAY');
       if (trends && trends.consumption && Array.isArray(trends.consumption.totals)) {
         const currentHour = parseInt(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }), 10) || 0;
         const todaySoFarKwh = trends.consumption.totals.slice(0, currentHour + 1).reduce((acc, val) => acc + (Number(val) || 0), 0);
