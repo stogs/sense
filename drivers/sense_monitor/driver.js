@@ -122,6 +122,10 @@ class SenseMonitorDriver extends Homey.Driver {
       this.log('[PAIR] Returning devices array to Homey frontend:', JSON.stringify(devices, null, 2));
       return devices;
     });
+
+    session.setHandler('device_list', async () => {
+      // Handled by view emission
+    });
   }
 
 }

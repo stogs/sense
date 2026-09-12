@@ -18,23 +18,16 @@
       return;
     }
 
-    Homey.showSelectView(devices, function(err, selectedDevices) {
-      if (err) {
-        Homey.alert(err.message || 'Failed to select devices');
-        return;
-      }
-      if (!selectedDevices || selectedDevices.length === 0) {
-        Homey.alert('No devices selected.');
-        return;
-      }
+    // Pass devices directly to Homey list view selection
+    Homey.emit('device_list', devices);
 
-      Homey.showLoadingOverlay();
+    Homey.on('add', function(selectedDevices, callback) {
+      if (!selectedDevices || selectedDevices.length === 0) {
+        return callback(new Error('No devices selected.'));
+      }
       Homey.addDevices(selectedDevices, function(err) {
-        Homey.hideLoadingOverlay();
-        if (err) {
-          Homey.alert(err.message || 'Failed to add devices');
-          return;
-        }
+        if (err) return callback(err);
+        callback(null, true);
         Homey.done();
       });
     });
