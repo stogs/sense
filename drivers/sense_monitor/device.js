@@ -161,9 +161,18 @@ class SenseMonitorDevice extends Homey.Device {
     if (senseDeviceId) {
       // If this is a child device, find its specific power from payload.devices
       const devices = payload.devices || [];
-      const matchedDev = devices.find(d => String(d.id) === String(senseDeviceId));
-      power = matchedDev ? (matchedDev.w !== undefined ? matchedDev.w : 0) : 0;
+      const matchedDev = devices.find(d => 
+        String(d.id) === String(senseDeviceId) || 
+        String(d.id) === String(this.store.id) ||
+        (d.name && this.name && d.name.toLowerCase() === this.name.toLowerCase())
+      );
+      power = matchedDev ? (matchedDev.w !== undefined ? matchedDev.w : (matchedDev.power !== undefined ? matchedDev.power : 0)) : 0;
       netPower = power;
+      
+      if (!matchedDev && devices.length > 0 && !this._loggedNoMatch) {
+        this._loggedNoMatch = true;
+        this.log(`[REALTIME WARN] Could not match child device senseDeviceId=${senseDeviceId} name=${this.name} against payload.devices:`, JSON.stringify(devices));
+      }
     } else {
       // Parent monitor aggregate power
       power = payload.w !== undefined ? payload.w : 0;
