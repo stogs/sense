@@ -93,41 +93,28 @@ class SenseMonitorDriver extends Homey.Driver {
           const monitorDevices = await client.getMonitorDevices(id);
           this.log(`[PAIR] Fetched monitor devices for monitor ${id}:`, JSON.stringify(monitorDevices));
           
-          // Support various array shapes returned by client.getMonitorDevices(id)
-          let devList = [];
           if (Array.isArray(monitorDevices)) {
-            devList = monitorDevices;
-          } else if (monitorDevices && typeof monitorDevices === 'object') {
-            if (Array.isArray(monitorDevices.devices)) {
-              devList = monitorDevices.devices;
-            } else {
-              devList = Object.values(monitorDevices).flat().filter(d => d && typeof d === 'object');
+            for (const dev of monitorDevices) {
+              if (!dev.id || !dev.name) continue;
+              devices.push({
+                name: dev.name,
+                data: {
+                  id: `sense_device_${dev.id}`,
+                  senseDeviceId: dev.id
+                },
+                store: {
+                  senseDeviceId: dev.id,
+                  monitorId: String(id)
+                },
+                parentId: String(id),
+                capabilities: ['measure_power', 'meter_power'],
+                settings: {
+                  device_type: dev.type || '',
+                  device_make: dev.make || '',
+                  device_model: dev.model || ''
+                }
+              });
             }
-          }
-
-          for (const dev of devList) {
-            const devId = dev.id || dev.device_id || dev.uuid;
-            const devName = dev.name || dev.label || dev.device_name;
-            if (!devId || !devName) continue;
-
-            devices.push({
-              name: String(devName),
-              data: {
-                id: `sense_device_${devId}`,
-                senseDeviceId: String(devId)
-              },
-              store: {
-                senseDeviceId: String(devId),
-                monitorId: String(id)
-              },
-              parentId: String(id),
-              capabilities: ['measure_power', 'meter_power'],
-              settings: {
-                device_type: dev.type || dev.device_type || '',
-                device_make: dev.make || '',
-                device_model: dev.model || ''
-              }
-            });
           }
         } catch (devErr) {
           this.error('[PAIR] Failed to fetch monitor devices for pairing:', devErr.message);
