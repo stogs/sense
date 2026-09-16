@@ -13,5 +13,5 @@ else
   cd "$APP_DIR"
 fi
 
-echo "Starting Homey app..."
-homey app run --remote
+echo "Installing Homey app..."
+homey app install
