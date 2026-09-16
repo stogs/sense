@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Completely transparent background with no circle or background shape -->
-  <path d="M 256 120 L 110 230 V 400 H 210 V 300 H 302 V 400 H 402 V 230 Z" fill="#F9461C"/>
+  <g transform="translate(99.028, 76) scale(15)">
+    <path d="M20.9296 7L10.4648 0L0 7V19H3.9866V24L11.5113 19H20.9296V7Z" fill="#F9461C"/>
+  </g>
 </svg>
