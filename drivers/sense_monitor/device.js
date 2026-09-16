@@ -1,5 +1,5 @@
 const Homey = require('homey');
-const { SenseApiClient } = require('sense-js-sdk');
+const { SenseApiClient } = require('../../lib/SenseApiClient');
 
 class SenseMonitorDevice extends Homey.Device {
 

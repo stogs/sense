@@ -4,13 +4,11 @@
   "description": "Sense Energy Monitor app for Homey",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "node postinstall.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "homey": "^3.12.2",
-    "sense-js-sdk": "1.3.1",
-    "ws": "^8.21.3"
+  "dependencies": {},
+  "devDependencies": {
+    "homey": "^3.12.2"
   },
   "engines": {
     "node": ">=21.0.0"
